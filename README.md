@@ -1,6 +1,6 @@
 # memorinda
 
-# acikhack2022 
-# TurkiyeAcıkKaynakPlatformu
-# Acıkhack2022
-# TürkiyeAçıkKaynakPlatformu
+### #acikhack2022 
+### #TurkiyeAcıkKaynakPlatformu
+### #Acıkhack2022
+### #TürkiyeAçıkKaynakPlatformu
