@@ -10,6 +10,10 @@ import { useNavigate } from "react-router";
 const signUpSchema = z
   .object({
     username: z.string().nonempty(),
+    firstname: z.string().nonempty(),
+    lastname: z.string().nonempty(),
+    birthdate: z.string().nonempty(),
+    phone: z.string().nonempty(),
     email: z.string().email("Please enter a valid email"),
 
     password: z
@@ -60,7 +64,7 @@ function Signup() {
       email: data.email,
       password: data.password,
     };
-
+    console.log(newUser);
     axios
       .post(`${process.env.REACT_APP_URL}/users/signup/add`, newUser)
       .then((res) => {
@@ -134,7 +138,7 @@ function Signup() {
                       {...register("birthdate")}
                       className="btn-border input-style form-control"
                       placeholder="Birth Date"
-                      type="date"
+                      type="string"
                     >
                     </input>
                    
