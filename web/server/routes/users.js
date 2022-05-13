@@ -54,6 +54,28 @@ userRoutes.route("/users/login/:email").post(function (req, res) {
     });
 });
 
+userRoutes.route("/users/organizer-login/:email").post(function (req, res) {
+    let db_connect = dbo.getDb("memorinda");
+    let myquery = {"email": req.params.email};
+    let currUser = req.body.data.user;
+    db_connect
+      .collection("organizers")
+      .findOne(myquery, async (err, result) => {
+        if (err) console.log(err.message);
+        
+        if (result) {
+          if (currUser.password == result.password) {
+            res.status(200).json(result);
+          } else {
+            res.status(200).json({ message: "Invalid Password" });
+          }
+        }
+        else {
+          res.status(200).json({ message: "Invalid E-mail" });
+        }
+      });
+  });
+
 // This section will help you create a new users.
 userRoutes.route("/users/signup/add").post(function (req, response) {
 
