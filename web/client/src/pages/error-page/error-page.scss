@@ -1,0 +1,45 @@
+.error-page{
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  color: white;
+
+}
+
+.error-page::after {
+  content: "";
+  background-image: url("../../../assets/event.webp");
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  opacity: 0.8;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.error-template {
+  justify-self: center;
+  text-align: center;
+  font-weight: 500;
+
+  p{
+    margin-bottom: 10px;
+    font-size: 3em;
+  }
+}
+
+.error-actions {
+  margin-top:25px;
+  margin-bottom:25px;
+  
+}
+.error-actions .btn {
+   margin-right:10px;
+ }
