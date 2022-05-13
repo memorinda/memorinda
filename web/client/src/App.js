@@ -4,6 +4,8 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import ErrorPage from "./pages/error-page/error-page.jsx";
 import Login from "./pages/login/login.jsx";
+import AddEvent from "./pages/organizer-addEvent/organizer-addEvent";
+import OrganizerLogin from "./pages/organizer-login/organizer-login.jsx";
 import Signup from "./pages/signup/signup.jsx";
 import { useStore } from "./store/store";
 
@@ -20,6 +22,11 @@ function App() {
               path="/login"
               element={<Login />}
             />
+             <Route
+              path="/organizer-login"
+              element={<OrganizerLogin />}
+            />
+            
             <Route
               path="/signup"
               element={<Signup />}
@@ -34,6 +41,16 @@ function App() {
             <Route
               path="/"
               element={<Login />}
+            />
+
+            <Route
+              path="/add-event"
+              element={<AddEvent />}
+            />
+
+            <Route
+              path="/organizer-login"
+              element={<OrganizerLogin />}
             />
 
             <Route
