@@ -1,12 +1,12 @@
 pragma solidity ^0.4.17;
-//https://soliditydeveloper.com/ecrecover TODO
+//https://soliditydeveloper.com/ecrecover TODO: signature
 
 contract EventFactory{
 
     address[] public deployedEvents;
 
-    function createEvent() public {
-        address newEvent = new Event();
+    function createEvent(string caption, uint ticketAmount, uint ticketCost) public {
+        address newEvent = new Event(caption, ticketAmount, ticketCost, msg.sender);
         deployedEvents.push(newEvent);
     }
 
@@ -23,7 +23,7 @@ contract Event{
     uint public _ticketAmount;
     address public _managerAddress;
 
-    Ticket[] public _ticketList;
+    /*Ticket[] public _ticketList;
 
     struct Ticket 
     {
@@ -33,16 +33,16 @@ contract Event{
         address _owner;
         uint _ticketCost;
         bool _onSale;
-        //uint ticketHash;
-    }
+    }*/
 
     //name description capacity eventdate location price 
     function Event(string caption, uint ticketAmt, uint ticketCost, address creator) public 
     {
         _caption = caption;
-        //createEventId()
         _ticketAmount = ticketAmt;
         _managerAddress = creator;
+
+        //TODO: create event ids
 
         //create tickets
         if(_ticketAmount > 0)
@@ -59,10 +59,10 @@ contract Event{
         _;
     }*/
 
-    function createTicket(uint ticketCost, address manager, uint ticketID, uint eventID) private//TODO change id counter
+    /*function createTicket(uint ticketCost, address manager, uint ticketID, uint eventID) private//TODO change id counter
     {
         Ticket memory newTicket = Ticket({
-            _ticketID: id,
+            _ticketID: ticketID,
             _eventID: eventID,
             _manager: manager,//owner is manager of the vent at ticket creation
             _owner: manager,
@@ -72,7 +72,7 @@ contract Event{
 
         //create hash and id
         _ticketList.push(newTicket);
-    }
+    }*/
 
     /*function createTicketID(){
         return 1;
@@ -116,11 +116,16 @@ contract Event{
 
 contract TicketFactory{
     address[] public deployedTickets;
+
+    function createTicket(string eventCaption, uint eventID, uint cost){//TODO: restrict ticket creation to event managers??
+        address newTicket = new Ticket();
+        deployedTickets.push(newTicket);//TODO: map these tickets to events
+    }
 }
     
 contract Ticket{
 
-    string public _eventCaption
+    string public _eventCaption;
     uint public _id;
     uint public _eventID;
     address public _eventManager;
@@ -133,19 +138,18 @@ contract Ticket{
         _;
     }
 
-    function Ticket(string eventCaption, uint eventID, uint cost) public restricted{
-        _eventCaption = eventCAption;
+    function Ticket(string eventCaption, uint eventID, uint cost, address creator) public restricted{
+        _eventCaption = eventCaption;
         _eventID = eventID;
         _cost = cost;
 
-        //set id
-        
+        //TODO: set ticket id
+        _onSale = true;
+        _owner = creator;//set owner as event creator at ticket init
+        _eventManager = creator;
+
     }
 
-    modifier restricted() {
-        require(msg.sender == _owner, "Error: Cannot change ticket sale state, wrong user");
-        _;
-    }
     function buy_ticket() public payable
     {
         require(_onSale == true, "Error: Ticket is not on sale.");
