@@ -48,7 +48,7 @@ contract Event{
         if(_ticketAmount > 0)
         {
             for (uint i = 0; i < _ticketAmount; i++) {
-                createTicket(ticketCost, _managerAddress, i, _id);
+ //               createTicket(ticketCost, _managerAddress, i, _id);
             }
         }
         
@@ -118,7 +118,7 @@ contract TicketFactory{
     address[] public deployedTickets;
 
     function createTicket(string eventCaption, uint eventID, uint cost){//TODO: restrict ticket creation to event managers??
-        address newTicket = new Ticket();
+        address newTicket = new Ticket(eventCaption, eventID, cost, msg.sender);
         deployedTickets.push(newTicket);//TODO: map these tickets to events
     }
 }
