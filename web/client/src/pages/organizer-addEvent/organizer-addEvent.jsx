@@ -55,7 +55,7 @@ function AddEvent() {
     // const signer = provider.getSigner()
 
     const resp = await eventFactory.methods.createEvent(data.eventName, data.eventDescription, 30, 30, data.eventDate.getTime(), data.eventCapacity).send({from: account});
-
+    console.log(resp);
     await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);
