@@ -3,6 +3,7 @@ import { Navigate } from "react-router";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import ErrorPage from "./pages/error-page/error-page.jsx";
+import Events from './pages/events/events';
 import Login from "./pages/login/login.jsx";
 import AddEvent from "./pages/organizer-addEvent/organizer-addEvent";
 import OrganizerLogin from "./pages/organizer-login/organizer-login.jsx";
@@ -30,6 +31,10 @@ function App() {
             <Route
               path="/signup"
               element={<Signup />}
+            />
+             <Route
+              path="/events"
+              element={<Events />}
             />
             <Route
               path="*"
@@ -60,6 +65,10 @@ function App() {
             <Route
               path="/signup"
               element={<Navigate to="/home"/>}
+            />
+             <Route
+              path="/events"
+              element={<Events />}
             />
             <Route
               path="*"
