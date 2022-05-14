@@ -151,7 +151,7 @@ contract Ticket{
         _;
     }
 
-    function Ticket(string eventCaption, uint eventID, uint cost, address creator) public restricted{
+    function Ticket(string eventCaption, uint eventID, uint cost, address creator) public{
         _eventCaption = eventCaption;
         _eventID = eventID;
         _cost = cost;
