@@ -16,7 +16,7 @@ const dbo = require("../db/conn");
 var Binary = require('mongodb').Binary;
 // This help convert the id from string to ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
-const { request } = require("express");
+const { request, response } = require("express");
 
 
 eventRoutes.route("/events").get(function (req, res) {
@@ -60,4 +60,10 @@ eventRoutes.route("/events").get(function (req, res) {
   
   });
 
+
+  eventRoutes.route("/events/buy-ticket").post(function (req, res) {
+    eventID = req.body.eventID;
+    console.log(eventID);
+    res.json("bought ticket");
+  });
   module.exports = eventRoutes;
