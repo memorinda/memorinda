@@ -51,6 +51,7 @@ contract Event{
     uint256 public _eventID;
     address public _organizerAddress;
     using Counters for Counters.Counter;
+
     Counters.Counter private _ticketIds;
     Counters.Counter private _ticketsSold;
     Ticket[] public _ticketList;
@@ -63,12 +64,16 @@ contract Event{
         uint _ticketCost;
         bool _onSale;
     }
+
     //name description capacity eventdate location price
     constructor (uint256 eventID, address creator) {
         _eventID = eventID;
         _organizerAddress = creator;
     }
 
+    /*
+        TICKET FUNCTIONS
+    */
     function createTicketsByAmount(uint ticketCost, uint ticketAmount) public {
         for (uint i = 0; i < ticketAmount; i++)
         {
@@ -125,15 +130,94 @@ contract Event{
 
     //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
     function getTicketIndexById(uint ticketID) public view returns(uint){
-        Ticket memory foundTicket;
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
             if(_ticketList[i]._ticketID == ticketID)
             {
-                foundTicket = _ticketList[i];
                 return i;
             }
         }
 
         revert("Ticket not found");
+    }
+
+    /*
+        MEMORINDA FUNCTIONS
+    */
+    Counters.Counter private _memorindaIds;
+    Counters.Counter private _memorindaSold;
+    Memorinda[] public _memorindaList;
+
+    struct Memorinda {
+        uint _memID;
+        uint _eventID;
+        address _organizer;
+        address _owner;
+        uint _memCost;
+        bool _onSale;
+    }
+
+    function createMemorindaByAmount(uint price, uint amount) public {
+        for (uint i = 0; i < amount; i++)
+        {
+            createTicket(price);
+        }
+    }
+
+    //create a single ticket
+    function createMemorinda(uint price) private {
+        _memorindaIds.increment();
+        Memorinda memory newMemorinda = Memorinda({
+            _memID: _memorindaIds.current(),
+            _eventID: _eventID,
+            _organizer: _organizerAddress,//owner is manager of the vent at mem creation
+            _owner: _organizerAddress,
+            _memCost: price,
+            _onSale: true
+        });
+
+        _memorindaList.push(newMemorinda);
+    }
+
+    function buy_memorinda(uint memorindaID) public payable
+    {
+        uint foundMemorindaIndex = getMemorindaIndexById(memorindaID);
+
+        require(_memorindaList[foundMemorindaIndex]._onSale == true, "Error: Memorinda is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == _memorindaList[foundMemorindaIndex]._memCost, "Error: Payment is not equal to mem cost.");
+
+        payable(_memorindaList[foundMemorindaIndex]._owner).transfer(msg.value);//transfer money to current owner
+        _memorindaList[foundMemorindaIndex]._owner = msg.sender;//change owner to buyer
+        _memorindaList[foundMemorindaIndex]._onSale = false;
+        _memorindaSold.increment();
+    }
+
+    function setMemorindaSale(bool saleFlag, uint ticketID) public {
+        uint foundMemorindaIndex = getMemorindaIndexById(ticketID);
+
+        require(_memorindaList[foundMemorindaIndex]._onSale == saleFlag, "Error: You cannot change mem state to the same state");//restriced checks it
+        require(_memorindaList[foundMemorindaIndex]._owner == msg.sender, "Error: Cannot change mem sale state, wrong user");//restriced checks it
+
+        _memorindaList[foundMemorindaIndex]._onSale = saleFlag;
+
+        if (saleFlag) {
+            _memorindaSold.decrement();
+        } else {
+            _memorindaSold.increment();
+        }
+    }
+
+    function getAllMemorindas() public view returns(Memorinda[] memory) {
+        return _memorindaList;
+    }
+
+    //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
+    function getMemorindaIndexById(uint memorindaID) public view returns(uint){
+         for (uint i = 0; i < _memorindaList.length; i++) {//find ticket index by id
+            if(_memorindaList[i]._memID == memorindaID)
+            {
+                return i;
+            }
+        }
+        revert("Memorinda not found");
     }
 }
