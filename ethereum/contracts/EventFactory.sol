@@ -100,6 +100,7 @@ contract Event{
 
         payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
         _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+        _ticketList[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
     }
 
