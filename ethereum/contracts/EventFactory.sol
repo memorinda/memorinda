@@ -13,7 +13,7 @@ contract EventFactory {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
         Event newEvent = new Event(name, currEventID, msg.sender);
-        
+
         deployedEvents.push(address(newEvent));
     }
 
@@ -31,7 +31,7 @@ contract Event{
 
     Ticket[] public _ticketList;
 
-    struct Ticket 
+    struct Ticket
     {
         uint _ticketID;
         uint _eventID;
