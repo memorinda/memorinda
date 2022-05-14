@@ -6,6 +6,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useStore } from "../../store/store";
 import "./organizer-addEvent.css";
+import Web3Modal from 'web3modal';
+import { ethers } from 'ethers';
 
 const addEventSchema = z
   .object({
@@ -39,32 +41,35 @@ function AddEvent() {
 
 
   const onSubmit = async (data) => {
-    
-   console.log(data);
+
+    // load image to ipfs before connect wallet
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+
+    console.log(data);
 
     await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);
     }).catch(err => console.log(err))
-    
+
     navigate("/add-event");
 
   };
-
-  
-
   return (
     <div>
       <div className="addEvent-info row align-items-center">
         <div className="addEvent-headInfo">
-          <h2 className="">Organize Event  
+          <h2 className="">Organize Event
           </h2>
         </div>
       </div>
       <div className="dashedBorder mt-5">
         <div className="addEventContent">
-        
-        <form onSubmit={handleSubmit(onSubmit)}>
+
+        <form onSubmit={onSubmit}>
 
            <div className="card-body">
               <div className="mt-3 d-flex flex-column">
@@ -78,7 +83,7 @@ function AddEvent() {
                 <small className="align-self-start error-text">
                   {errors.eventName?.message}
                 </small>
-      
+
               </div>
 
               <div className="mt-3 d-flex flex-column">
@@ -101,7 +106,7 @@ function AddEvent() {
                 <small className="align-self-start error-text">
                   {errors.eventLocation?.message}
                 </small>
-      
+
               </div>
               <div className="mt-3 d-flex flex-column">
                 <input
@@ -116,7 +121,7 @@ function AddEvent() {
                 <small className="align-self-start error-text">
                   {errors.eventDate?.message}
                 </small>
-              </div>    
+              </div>
 
                <div className="mt-3 d-flex flex-column">
                 <input
@@ -131,7 +136,7 @@ function AddEvent() {
                 <small className="align-self-start error-text">
                   {errors.eventCapacity?.message}
                 </small>
-              </div>    
+              </div>
 
                <div className="mt-3 d-flex flex-column">
                 <input
@@ -147,25 +152,25 @@ function AddEvent() {
                 <small className="align-self-start error-text">
                   {errors.eventCapacity?.message}
                 </small>
-              </div>                 
-                
-          
+              </div>
+
+
               <button
                 className="btn col-2 addEventBtn"
                 styles={{ display: "none" }}
               >
-                <span className="addEventBtnText"> 
-                    Create Event 
+                <span className="addEventBtnText">
+                    Create Event
                 </span>
-              </button> 
+              </button>
             </div>
 
         </form>
         </div>
       </div>
-      
+
     </div>
-    
+
   );
 }
 
