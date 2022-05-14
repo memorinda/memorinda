@@ -19,8 +19,8 @@ contract EventFactory {
 
     function getDeployedEvents() public view returns(address[] memory) {
         return deployedEvents;
-
     }
+
 }
 
 contract Event{
@@ -47,6 +47,13 @@ contract Event{
         _organizerAddress = creator;
     }
 
+    function createTicketsByAmount(uint ticketCost, uint ticketAmount) public {
+        for (uint i = 0; i < ticketAmount; i++) 
+        {
+            createTicket(ticketCost, i);
+        }
+    }
+
     //create a single ticket
     function createTicket(uint ticketCost, uint ticketID) private {
 
@@ -64,29 +71,29 @@ contract Event{
 
     function buy_ticket(uint ticketID) public payable
     {
-        Ticket memory foundTicket = getTicketById(ticketID);
+        uint foundTicketIndex = getTicketIndexById(ticketID);
 
-        require(foundTicket._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        require(msg.value == foundTicket._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-        payable(foundTicket._owner).transfer(msg.value);//transfer money to current owner
-        foundTicket._owner = msg.sender;//change owner to buyer
+        payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
     }
 
     function setTicketSale(bool saleFlag, uint ticketID) public
     {
-        Ticket memory foundTicket = getTicketById(ticketID);
+        uint foundTicketIndex = getTicketIndexById(ticketID);
 
-        require(foundTicket._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+        require(_ticketList[foundTicketIndex]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
 
-        foundTicket._onSale = saleFlag;
+        _ticketList[foundTicketIndex]._onSale = saleFlag;
     }
 
     function getAllTickets() public view returns(Ticket[] memory) {
         return _ticketList;
     }
 
-    function getTicketById(uint ticketID) public view returns(Ticket memory){
+    /*function getTicketById(uint ticketID) public view returns(Ticket memory){
         Ticket memory foundTicket;
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket by id
             if(_ticketList[i]._ticketID == ticketID)
@@ -96,6 +103,20 @@ contract Event{
         }
 
         return foundTicket;
+    }*/
+
+    //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
+    function getTicketIndexById(uint ticketID) public view returns(uint){
+        Ticket memory foundTicket;
+         for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
+            if(_ticketList[i]._ticketID == ticketID)
+            {
+                foundTicket = _ticketList[i];
+                return i;
+            }
+        }
+
+        revert("Ticket not found");
     }
 }
 
