@@ -106,5 +106,4 @@ dist
 .tern-port
 
 # DS Store
-.DS_Store
-web/.DS_Store
+*.DS_Store
