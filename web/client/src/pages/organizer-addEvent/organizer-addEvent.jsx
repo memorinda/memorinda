@@ -69,7 +69,7 @@ function AddEvent() {
       <div className="dashedBorder mt-5">
         <div className="addEventContent">
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
 
            <div className="card-body">
               <div className="mt-3 d-flex flex-column">
