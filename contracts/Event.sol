@@ -22,7 +22,7 @@ contract Event{
     uint public _id;
     uint public _ticketAmount;
     address public _managerAddress;
-
+    uint public _ticketCost;
     /*Ticket[] public _ticketList;
 
     struct Ticket 
@@ -41,13 +41,14 @@ contract Event{
         _caption = caption;
         _ticketAmount = ticketAmt;
         _managerAddress = creator;
-
+        _ticketCost = ticketCost;
         //TODO: create event ids
 
         //create tickets
         if(_ticketAmount > 0)
         {
             for (uint i = 0; i < _ticketAmount; i++) {
+                TicketFactory newTFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
  //               createTicket(ticketCost, _managerAddress, i, _id);
             }
         }
@@ -117,9 +118,20 @@ contract Event{
 contract TicketFactory{
     address[] public deployedTickets;
 
-    function createTicket(string eventCaption, uint eventID, uint cost){//TODO: restrict ticket creation to event managers??
-        address newTicket = new Ticket(eventCaption, eventID, cost, msg.sender);
+    function TicketFactory(string eventCaption, uint eventID, uint cost, uint ticketAmount){
+        for (uint i = 0; i < ticketAmount; i++) 
+        {
+            createTicket(eventCaption, eventID, cost, msg.sender);
+        }
+    }
+
+    function createTicket(string eventCaption, uint eventID, uint cost, address creator){//TODO: restrict ticket creation to event managers??
+        address newTicket = new Ticket(eventCaption, eventID, cost, creator);
         deployedTickets.push(newTicket);//TODO: map these tickets to events
+    }
+
+    function getDeployedTickets() public view returns(address[]) {
+        return deployedTickets;
     }
 }
     
