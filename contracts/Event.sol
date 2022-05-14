@@ -48,10 +48,8 @@ contract Event{
         //create tickets
         if(_ticketAmount > 0)
         {
-            for (uint i = 0; i < _ticketAmount; i++) {
-                _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
- //               createTicket(ticketCost, _managerAddress, i, _id);
-            }
+            _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
+            //createTicket(ticketCost, _managerAddress, i, _id);
         }
         
     }
@@ -135,7 +133,7 @@ contract TicketFactory{
         return deployedTickets;
     }
 }
-    
+
 contract Ticket{
 
     string public _eventCaption;
@@ -168,7 +166,8 @@ contract Ticket{
         require(_onSale == true, "Error: Ticket is not on sale.");
         require(msg.value == _cost, "Error: Ticket payment is not equal to ticket cost.");
 
-        _owner = msg.sender;
+        _owner.transfer(msg.value);//transfer money to current owner
+        _owner = msg.sender;//change owner to buyer
     }
 
     function setTicketSale(bool saleFlag) public restricted
