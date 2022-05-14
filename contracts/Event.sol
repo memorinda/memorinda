@@ -23,6 +23,7 @@ contract Event{
     uint public _ticketAmount;
     address public _managerAddress;
     uint public _ticketCost;
+    TicketFactory _ticketFactory;
     /*Ticket[] public _ticketList;
 
     struct Ticket 
@@ -48,7 +49,7 @@ contract Event{
         if(_ticketAmount > 0)
         {
             for (uint i = 0; i < _ticketAmount; i++) {
-                TicketFactory newTFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
+                _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
  //               createTicket(ticketCost, _managerAddress, i, _id);
             }
         }
