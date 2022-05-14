@@ -6,8 +6,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useStore } from "../../store/store";
 import "./organizer-addEvent.css";
-import Web3Modal from 'web3modal';
-import { ethers } from 'ethers';
+
+
+import { useContract } from '../../providers/ContractProvider';
+import { useMetamask } from '../../providers/MetaMaskProvider';
+//import { ethers } from 'ethers';
 
 const addEventSchema = z
   .object({
@@ -21,6 +24,9 @@ const addEventSchema = z
 
 
 function AddEvent() {
+
+  const {contract: eventFactory, web3js} = useContract();
+  const account = useMetamask();
 
   const {
     register,
@@ -43,13 +49,13 @@ function AddEvent() {
   const onSubmit = async (data) => {
 
     // load image to ipfs before connect wallet
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
+    // const web3Modal = new Web3Modal()
+    // const connection = await web3Modal.connect()
+    // const provider = new ethers.providers.Web3Provider(connection)
+    // const signer = provider.getSigner()
 
-    console.log(data);
-
+    const resp = await eventFactory.methods.createEvent(data.eventName, data.eventDescription, 30, 30, data.eventDate.getTime(), data.eventCapacity).send({from: account});
+    console.log(resp);
     await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);

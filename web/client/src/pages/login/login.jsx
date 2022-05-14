@@ -49,7 +49,7 @@ function Login() {
           const dbUser = res.data;
           console.log("login user:", dbUser);
           dispatch(userLogin(dbUser));
-          navigate("/home");
+          navigate("/events");
         } else {
           setErrorMessage("Error! Please try again.");
         }
