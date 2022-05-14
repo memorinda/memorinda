@@ -1,32 +1,40 @@
-pragma solidity ^0.4.17;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.4;
 //https://soliditydeveloper.com/ecrecover TODO: signature
 
-contract EventFactory{
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-    address[] public deployedEvents;
+contract EventFactory {
+    using Counters for Counters.Counter;
+    Counters.Counter private _eventID;
 
-    function createEvent(string caption, uint ticketAmount, uint ticketCost) public {
-        address newEvent = new Event(caption, ticketAmount, ticketCost, msg.sender);
-        deployedEvents.push(newEvent);
+    // address[] public deployedEvents;
+
+    function createEvent(string memory name, uint ticketAmount, uint ticketCost) public {
+        _eventID.increment();
+        uint256 currEventID = _eventID.current();
+        Event newEvent = new Event(name, _eventID, ticketAmount, ticketCost, msg.sender);
+        // deployedEvents.push(newEvent);
     }
 
-    function getDeployedEvents() public view returns(address[]) {
-        return deployedEvents;
-    }
+    function getDeployedEvents() public view returns(address[] memory) {
+        // return deployedEvents;
 
+    }
 }
 
 contract Event{
 
-    string public _caption;
-    uint public _id;
+    string public _eventName;
+    uint256 public _eventID;
     uint public _ticketAmount;
-    address public _managerAddress;
+    address public _organizerAddress;
     uint public _ticketCost;
-    TicketFactory _ticketFactory;
+    TicketFactory public _ticketFactory;
     /*Ticket[] public _ticketList;
 
-    struct Ticket 
+    struct Ticket
     {
         uint _ticketID;
         uint _eventID;
@@ -36,22 +44,15 @@ contract Event{
         bool _onSale;
     }*/
 
-    //name description capacity eventdate location price 
-    function Event(string caption, uint ticketAmt, uint ticketCost, address creator) public 
+    //name description capacity eventdate location price
+    constructor (string memory name, uint256 eventID, uint ticketAmt, uint ticketCost, address organizer) public
     {
-        _caption = caption;
+        _eventName = name;
+        _eventID = eventID;
         _ticketAmount = ticketAmt;
-        _managerAddress = creator;
+        _organizerAddress = organizer;
         _ticketCost = ticketCost;
-        //TODO: create event ids
-
-        //create tickets
-        if(_ticketAmount > 0)
-        {
-            _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount, _managerAddress);
-            //createTicket(ticketCost, _managerAddress, i, _id);
-        }
-        
+        _ticketFactory = new TicketFactory(_eventName, _eventID);
     }
 
     /*modifier restricted() {
@@ -114,8 +115,66 @@ contract Event{
 
 }
 
+contract TicketFactory{
+    address[] public deployedTickets;
+
+    constructor (string memory eventName, uint eventID){
+        /*
+        for (uint i = 0; i < ticketAmount; i++) {
+            createTicket(eventName, eventID, cost, msg.sender);
+        }
+        */
+    }
 
 
+    function createTicket(string memory eventName, uint eventID, uint cost, address creator) public {//TODO: restrict ticket creation to event managers??
+        Ticket newTicket = new Ticket(eventName, eventID, cost, creator);
+        // deployedTickets.push(newTicket);//TODO: map these tickets to events
+    }
 
+    function getDeployedTickets() public view returns(address[] memory) {
+        return deployedTickets;
+    }
+}
 
+contract Ticket{
 
+    string public _eventName;
+    uint public _id;
+    uint public _eventID;
+    address public _eventManager;
+    address public _owner;
+    uint public _cost;
+    bool public _onSale;
+
+    modifier restricted() {
+        require(msg.sender == _owner, "Error: Cannot change object properties, wrong owner");
+        _;
+    }
+
+    constructor (string memory eventName, uint eventID, uint cost, address creator) public restricted{
+        _eventName = eventName;
+        _eventID = eventID;
+        _cost = cost;
+
+        //TODO: set ticket id
+        _onSale = true;
+        _owner = creator;//set owner as event creator at ticket init
+        _eventManager = creator;
+
+    }
+
+    function buy_ticket() public payable
+    {
+        require(_onSale == true, "Error: Ticket is not on sale.");
+        require(msg.value == _cost, "Error: Ticket payment is not equal to ticket cost.");
+
+        _owner = msg.sender;
+    }
+
+    function setTicketSale(bool saleFlag) public restricted
+    {
+        //require(_owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+        _onSale = saleFlag;
+    }
+}
