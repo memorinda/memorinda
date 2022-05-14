@@ -38,6 +38,7 @@ contract EventFactory {
         });
 
         organizerToEvent[msg.sender].push(newEvent);
+
     }
 
     function getDeployedEvents() public view  returns (eventProperties[] memory) {
