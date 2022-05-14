@@ -68,9 +68,47 @@ function Events() {
 
   return (
     <div className="events">
+     <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-1">
+          <button
+            type='button'
+            className="btn btn-block btn-success"
+            onClick={() => {
+              navigate("/login")
+            }}
+          >
+               LOGIN
+          </button>
+        </div>
+      
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={() => {
+              navigate("/signup")
+            }}
+          >
+               SIGN UP
+          </button>
+        </div>
+
+        <div className="col-2">
+          <button
+            type='button'
+            className="btn btn-block btn-secondary"
+            onClick={() => {
+              navigate("/organizer-login")
+            }}
+          >
+               ORGANIZER
+          </button>
+        </div>
+
+      </div>
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h3 >Current Events</h3>
+        <h3 >Upcoming Events</h3>
         </div>
       </div>
 
