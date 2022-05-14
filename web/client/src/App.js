@@ -20,6 +20,10 @@ function App() {
         {!currentUser ?
           <>
             <Route
+              path="/"
+              element={<Events />}
+            />
+            <Route
               path="/login"
               element={<Login />}
             />
@@ -60,11 +64,11 @@ function App() {
 
             <Route
               path="/login"
-              element={<Navigate to="/home"/>}
+              element={<Navigate to="/events"/>}
             />
             <Route
               path="/signup"
-              element={<Navigate to="/home"/>}
+              element={<Navigate to="/events"/>}
             />
              <Route
               path="/events"
