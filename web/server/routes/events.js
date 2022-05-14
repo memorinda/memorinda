@@ -59,3 +59,5 @@ eventRoutes.route("/events").get(function (req, res) {
     })
   
   });
+
+  module.exports = eventRoutes;
