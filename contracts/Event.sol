@@ -48,7 +48,7 @@ contract Event{
         //create tickets
         if(_ticketAmount > 0)
         {
-            _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount);
+            _ticketFactory = new TicketFactory(_caption, _id, _ticketCost, _ticketAmount, _managerAddress);
             //createTicket(ticketCost, _managerAddress, i, _id);
         }
         
@@ -117,10 +117,10 @@ contract Event{
 contract TicketFactory{
     address[] public deployedTickets;
 
-    function TicketFactory(string eventCaption, uint eventID, uint cost, uint ticketAmount){
+    function TicketFactory(string eventCaption, uint eventID, uint cost, uint ticketAmount, address creator){
         for (uint i = 0; i < ticketAmount; i++) 
         {
-            createTicket(eventCaption, eventID, cost, msg.sender);
+            createTicket(eventCaption, eventID, cost, creator);
         }
     }
 
