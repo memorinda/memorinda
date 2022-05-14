@@ -1,29 +1,48 @@
-import React, { useCallback, useState } from "react";
+import axios from 'axios';
+import React, { useEffect, useState } from "react";
 // import { Container, Nav, NavDropdown } from "react-bootstrap";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
-import { useStore } from "../../store/store";
 import "./events.css";
 
 function Events() {
 
   const [allEvents, setAllEvents] = useState()
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [state, dispatch] = useStore();
-  const { user: currentUser } = state;
-  // const [errorMessage, setErrorMessage] = useState();
-  const onSubmit = useCallback((data) => {
-    // dispatch(userLogout());
-    navigate("/login");
-  }, [dispatch, navigate]);
+
+  // const [searchQuery, setSearchQuery] = useState("");
+  // const [state, dispatch] = useStore();
+  // const { user: currentUser } = state;
+  // // const [errorMessage, setErrorMessage] = useState();
+  // const onSubmit = useCallback((data) => {
+  //   // dispatch(userLogout());
+  //   navigate("/login");
+  // }, [dispatch, navigate]);
 
 
 
-  async function handleSearch() {
-    navigate(`/eventSearch/${searchQuery}`);
+  // async function handleSearch() {
+  //   navigate(`/eventSearch/${searchQuery}`);
+  // }
+
+  const fetchEvents = async () => {
+    axios
+    .get(`${process.env.REACT_APP_URL}/events`)
+    .then((res) => {
+      console.log(res.data);
+      setAllEvents(res.data)
+     
+    })
+    .catch((err) => {
+      console.log("Error:", err);
+      
+    });
   }
+
+  useEffect(() => {
+    fetchEvents();
+  }, [])
 
   return (
     <div className="events">
