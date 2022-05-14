@@ -1,0 +1,104 @@
+.events {
+  padding: 0;
+  margin: 0;
+}
+
+.navbarDropdownRight {
+  right: 0;
+  left: auto;
+  margin-right: 10px;
+}
+
+.search-bar {
+  z-index:1052;
+  display: flex;
+  position: relative;
+  align-items: center;
+  border-radius: 3px;
+  background-color: #fff;
+  padding: 0 15px;
+  margin-right: 30px;
+  height: 62px;
+  color:#4e657e;
+  box-shadow:0 2px 2px 0 rgba(0, 0, 0, .16), 0 0 0 1px rgba(0, 0, 0, .08);
+}
+.search-bar:active, .search-bar:focus, .search-bar:hover {
+  box-shadow:0 3px 8px 0 rgba(0, 0, 0, .2), 0 0 0 1px rgba(0, 0, 0, .08);
+}
+
+.search-bar-form {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  height:100%;
+}
+
+.search-bar-input {
+  flex: 1;
+  outline: none;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  background-color: transparent;
+  height: 100%;
+  width: 300px;
+  line-height:100%;
+}
+.svg-search-bar {
+  width: 1em;
+  font-size: inherit;
+  height: 1em;
+  overflow: visible;
+  vertical-align:-0.125em;
+  display: block;
+  margin-right: 15px;
+  color: #9ea9b5;
+  font-size:22px;
+}
+
+.search-bar-button {
+  border-radius: 3px;
+  padding: 10px 15px;
+  line-height: 1.428571429;
+  font-size:16px;
+  background-image: none;
+  cursor: pointer;
+  vertical-align: middle;
+  text-align: center;
+  font-weight: 400;
+  touch-action:manipulation;
+  transition: background-color .3s, border-color .3s, color .3s;
+  border: 1px solid #1c9941;
+  background-color: #1c9941;
+  color:#fff;
+}
+/* #0088d7 - blue*/
+.search-bar-button:disabled, .search-bar-button[disabled] {
+  opacity: 1;
+  border-color: #4ebeff;
+  box-shadow: none;
+  background-color: #4ebeff;
+  cursor: not-allowed;
+  color: #fff;
+  pointer-events:none
+}
+
+.search-bar-button i:not(:last-child), .search-bar-button svg:not(:last-child) {
+  margin-right:8px;
+}
+.search-bar-button i:not(:first-child), .search-bar-button svg:not(:first-child) {
+  margin-left:8px;
+}
+
+svg:not(:root).svg-search-bar {
+  overflow:visible
+}
+
+
+.company-logo {
+  margin: 0px !important;
+}
+
+.homepage-margin {
+  margin-left: 1vw;
+}
