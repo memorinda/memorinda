@@ -12,7 +12,7 @@ const signUpSchema = z
     username: z.string().nonempty(),
     firstname: z.string().nonempty(),
     lastname: z.string().nonempty(),
-    birthdate: z.string().nonempty(),
+    birthdate: z.date(),
     phone: z.string().nonempty(),
     email: z.string().email("Please enter a valid email"),
 
@@ -135,10 +135,12 @@ function Signup() {
 
                   <div className="mt-3 d-flex flex-column">
                     <input
-                      {...register("birthdate")}
+                      {...register("birthdate", {
+                        setValueAs: (v) => v === "" ? undefined : new Date(v),
+                      })}
                       className="btn-border input-style form-control"
                       placeholder="Birth Date"
-                      type="string"
+                      type="date"
                     >
                     </input>
                    
