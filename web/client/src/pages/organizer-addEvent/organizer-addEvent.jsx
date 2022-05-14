@@ -42,7 +42,7 @@ function AddEvent() {
     
    console.log(data);
 
-    await axios.post(`${process.env.REACT_APP_URL}/addEvent`, data, {
+    await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);
     }).catch(err => console.log(err))
