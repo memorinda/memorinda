@@ -119,4 +119,3 @@ contract Event{
         revert("Ticket not found");
     }
 }
-
