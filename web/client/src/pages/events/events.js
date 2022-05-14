@@ -6,9 +6,12 @@ import { GrLocation } from "react-icons/gr";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
+import { useStore } from '../../store/store';
 import "./events.scss";
 
 function Events() {
+  const [state] = useStore();
+  const { user: currentUser } = state;
 
   const [allEvents, setAllEvents] = useState([])
   const navigate = useNavigate();
@@ -44,7 +47,20 @@ function Events() {
   }
 
   const buyTicket = (eventID) => {
-    console.log(eventID);
+    if(!currentUser){
+      navigate("/login")
+    }else {
+      console.log(eventID);
+      axios
+      .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+
+    }
   }
   useEffect(() => {
     fetchEvents();
