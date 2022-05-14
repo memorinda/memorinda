@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Container, Nav, NavDropdown } from "react-bootstrap";
-import Navbar from "react-bootstrap/Navbar";
+// import { Container, Nav, NavDropdown } from "react-bootstrap";
+// import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../store/store";
@@ -27,7 +27,7 @@ function Events() {
 
   return (
     <div className="events">
-      <div className="row">
+      {/* <div className="row">
         <div className="col">
         <Navbar
           bg="light"
@@ -44,7 +44,7 @@ function Events() {
                       src={logo}
                       alt={"logo"}
                     />
-                  </Navbar.Brand> */}
+                  </Navbar.Brand> 
                   <Navbar.Toggle aria-controls="navbarScroll" />
                   <Navbar.Collapse id="navbarScroll">
                     <Nav
@@ -110,9 +110,11 @@ function Events() {
                     </NavDropdown>
                   </Navbar.Collapse>
                 </Container>
-              </Navbar>
-            </div>
+        </Navbar>
+        </div>
       </div>
+    */
+   }
 
       <div className="row">
       
