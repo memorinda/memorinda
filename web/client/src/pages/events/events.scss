@@ -1,0 +1,37 @@
+.events {
+  padding: 10px;
+  margin: 0;
+}
+
+.event-header {
+  height: 80px;
+  background-color: #6fa544;
+  margin: 10px;
+  padding: 20px;
+
+  h3{
+    color: rgb(242, 233, 233);
+  }
+  
+}
+
+.event-picture {
+  background-image: url("../../../assets/event.webp");
+
+  width: 120px;
+  height: 120px;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.event-content {
+  background-color: #f4f7fa;
+  margin: 10px;
+  padding: 20px;
+
+  border: 1px solid rgb(249, 245, 245);
+  border-radius: 10px;
+}
