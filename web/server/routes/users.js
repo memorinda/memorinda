@@ -85,8 +85,8 @@ userRoutes.route("/users/signup/add").post(function (req, response) {
     username: req.body.username,
     firstname: req.body.firstname,
     lastname: req.body.lastname,
+    birthdate: req.body.birthdate,
     phone: req.body.phone,
-    date: req.body.date,
     email: req.body.email,
     password: req.body.password,
   };
