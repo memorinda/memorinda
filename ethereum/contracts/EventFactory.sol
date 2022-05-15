@@ -23,8 +23,6 @@ contract EventFactory {
 
     mapping(uint256 => eventProperties) private idToEvent;
 
-    mapping(address => Event[]) private organizerToEvent;
-
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
@@ -77,6 +75,7 @@ contract Event is ERC721URIStorage {
     uint256 public _eventID;
     address public _organizerAddress;
     using Counters for Counters.Counter;
+
     Counters.Counter private _ticketIds;
     Counters.Counter private _ticketsSold;
     Ticket[] public _ticketList;
@@ -89,6 +88,7 @@ contract Event is ERC721URIStorage {
         uint _ticketCost;
         bool _onSale;
     }
+
     //name description capacity eventdate location price
 
     constructor (uint256 eventID) ERC721("Memorinda", "MEM") {
@@ -98,9 +98,14 @@ contract Event is ERC721URIStorage {
     /*
         TICKET FUNCTIONS
     */
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public {
-        for (uint i = 0; i < ticketAmount; i++)
-        {
+
+    modifier restricted() {
+        require(msg.sender == _organizerAddress);
+        _;
+    }
+
+    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted {
+        for (uint i = 0; i < ticketAmount; i++) {
             createTicket(tokenURI[i], ticketCost);
         }
     }
@@ -156,11 +161,9 @@ contract Event is ERC721URIStorage {
 
     // //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
     function getTicketIndexById(uint ticketID) public view returns(uint){
-        Ticket memory foundTicket;
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
             if(_ticketList[i]._ticketID == ticketID)
             {
-                foundTicket = _ticketList[i];
                 return i;
             }
         }

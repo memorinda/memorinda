@@ -143,23 +143,6 @@ function AddEvent() {
                 </small>
               </div>
 
-               <div className="mt-3 d-flex flex-column">
-                <input
-                  {...register("eventPrice", {
-                      setValueAs: (v) => v === "" ? undefined : parseInt(v, 10),
-                  })}
-                  className="btn-border input-style form-control"
-                  placeholder="Event Price"
-                  type="number"
-                  step="0.001"
-                >
-                </input>
-                <small className="align-self-start error-text">
-                  {errors.eventCapacity?.message}
-                </small>
-              </div>
-
-
               <button
                 className="btn col-2 addEventBtn"
                 styles={{ display: "none" }}

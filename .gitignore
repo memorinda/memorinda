@@ -107,3 +107,7 @@ dist
 
 # DS Store
 *.DS_Store
+
+# Build files
+ethereum/build/*
+web/client/src/abis
