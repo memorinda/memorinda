@@ -20,6 +20,11 @@ npm install
 # create .env file for React App
 echo "REACT_APP_URL=http://localhost:5000" > .env
 ```
+Start your react app locally.
+
+```
+npm start
+```
 
 ### Service
 A backend application that is managed by service provider to keep user information to authenticate during event in-person. It is developed using NodeJS and MongoDB is used as a database. Source code accessible inside `web/server`
