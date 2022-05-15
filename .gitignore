@@ -110,4 +110,4 @@ dist
 
 # Build files
 ethereum/build/*
-web/client/src/abis
+web/client/src/abis/*
