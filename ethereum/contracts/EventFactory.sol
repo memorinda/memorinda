@@ -11,6 +11,7 @@ contract EventFactory {
     Counters.Counter private _eventID;//keep track of event ids
 
     struct eventProperties {
+        uint256 _eventID;
         string _eventName;
         string _eventDescription;
         address _eventAdress;
@@ -22,11 +23,14 @@ contract EventFactory {
 
     mapping(uint256 => eventProperties) private idToEvent;
 
+    mapping(address => Event[]) private organizerToEvent;
+
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
-        Event newEvent = new Event(currEventID);
+        Event newEvent = new Event(currEventID, msg.sender);
         idToEvent[currEventID] = eventProperties({
+            _eventID: currEventID,
             _eventName: eventName,
             _eventDescription: eventDescription,
             _eventAdress: address(newEvent),
@@ -35,6 +39,15 @@ contract EventFactory {
             _eventTimestamp: eventTimestamp,
             _eventCapacity: eventCapacity
         });
+
+        organizerToEvent[msg.sender].push(newEvent);
+
+    }
+
+    function deployedEventsLength() public view returns (uint256) {
+        uint totalEvents = _eventID.current();
+
+        return totalEvents;
     }
 
     function getDeployedEvents() public view  returns (eventProperties[] memory) {
@@ -44,6 +57,14 @@ contract EventFactory {
             events[i] = idToEvent[i+1];
         }
         return events;
+    }
+
+    function getEventsByOrganizer(address organizerAddress) public view returns(Event[] memory) {
+        return organizerToEvent[organizerAddress];
+    }
+
+    function getEventsByID(uint256 eventID) public view returns(eventProperties memory) {
+        return idToEvent[eventID];
     }
 
 }
@@ -56,7 +77,8 @@ contract Event is ERC721URIStorage {
 
     Counters.Counter private _ticketIds;
     Counters.Counter private _ticketsSold;
-    Ticket[] public _ticketList;
+
+    mapping(uint256 => Ticket) private idToTicket;
 
     struct Ticket {
         uint _ticketID;
@@ -69,8 +91,9 @@ contract Event is ERC721URIStorage {
 
     //name description capacity eventdate location price
 
-    constructor (uint256 eventID) ERC721("Memorinda", "MEM") {
+    constructor (uint256 eventID, address creator) ERC721("Memorinda", "MEM") {
         _eventID = eventID;
+        _organizerAddress = creator;
     }
 
     /*
@@ -82,6 +105,7 @@ contract Event is ERC721URIStorage {
         _;
     }
 
+
     function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted {
         for (uint i = 0; i < ticketAmount; i++) {
             createTicket(tokenURI[i], ticketCost);
@@ -89,7 +113,7 @@ contract Event is ERC721URIStorage {
     }
 
     //create a single ticket
-    function createTicket(string memory tokenURI, uint ticketCost) private {
+    function createTicket(string memory tokenURI, uint ticketCost) public {
         _ticketIds.increment();
         uint256 newTokenId = _ticketIds.current();
         Ticket memory newTicket = Ticket({
@@ -102,29 +126,52 @@ contract Event is ERC721URIStorage {
         });
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
-        _ticketList.push(newTicket);
+        idToTicket[newTokenId] = newTicket;
     }
 
-    function buy_ticket(uint ticketID) public payable
-    {
-        uint foundTicketIndex = getTicketIndexById(ticketID);
+    function buy_ticket(uint256 ticketID) public payable {
 
-        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        Ticket storage _currTicket = idToTicket[ticketID];
+        require(_currTicket._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == _currTicket._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-        payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
-        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
-        _ticketList[foundTicketIndex]._onSale = false;
+        payable(_currTicket._owner).transfer(msg.value); //transfer money to current owner
+        _currTicket._owner = msg.sender; //change owner to buyer
+        _currTicket._onSale = false;
         _ticketsSold.increment();
     }
 
-    function setTicketSale(bool saleFlag, uint ticketID) public {
-        uint foundTicketIndex = getTicketIndexById(ticketID);
+    function getTicketIndexBySale() public view returns(uint){
+        uint totalTickets = _ticketIds.current();
+        for (uint i = 0; i < totalTickets; i++){
+            if(idToTicket[i+1]._onSale == true){
+                return i;
+            }
+        }
+        revert("All tickets are sold");
+    }
 
-        require(_ticketList[foundTicketIndex]._onSale == saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
-        require(_ticketList[foundTicketIndex]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+    function buy_ticketFromEventID() public payable returns(uint)
+    {
+        uint foundTicketIndex = getTicketIndexBySale();
 
-        _ticketList[foundTicketIndex]._onSale = saleFlag;
+        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+
+        payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        idToTicket[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+        idToTicket[foundTicketIndex]._onSale = false;
+        _ticketsSold.increment();
+
+        return foundTicketIndex;
+    }
+
+    function setTicketSale(bool saleFlag, uint256 ticketID) public {
+
+        require(idToTicket[ticketID]._onSale == saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+
+        idToTicket[ticketID]._onSale = saleFlag;
 
         if (saleFlag) {
             _ticketsSold.decrement();
@@ -134,8 +181,12 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTickets() public view returns(Ticket[] memory) {
-        return _ticketList;
-    }
+        uint256 totalNumTickets = _ticketsSold.current();
+        Ticket[] memory postTickets = new Ticket[](totalNumTickets);
+        uint256 currInd = 0;
+        for (uint256 i=0; i< totalNumTickets; i++) {
+            if (idToTicket[i+1]._onSale == true) {
+                postTickets[currInd] = idToTicket[i+1];
 
     function getTicketOwnerById(uint ticketID) public view returns(address) {
             uint foundIndex = getTicketIndexById(ticketID);
@@ -143,17 +194,6 @@ contract Event is ERC721URIStorage {
             return _ticketList[foundIndex]._owner;
         }
     
-    //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
-    function getTicketIndexById(uint ticketID) public view returns(uint){
-         for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
-            if(_ticketList[i]._ticketID == ticketID)
-            {
-                return i;
-            }
-        }
-
-        revert("Ticket not found");
-    }
 
     /*
         MEMORINDA FUNCTIONS
