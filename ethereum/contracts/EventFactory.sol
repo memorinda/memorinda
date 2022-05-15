@@ -23,6 +23,8 @@ contract EventFactory {
 
     mapping(uint256 => eventProperties) private idToEvent;
 
+    mapping(address => Event[]) private organizerToEvent;
+
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
