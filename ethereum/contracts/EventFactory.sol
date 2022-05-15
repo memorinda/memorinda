@@ -127,18 +127,18 @@ contract Event is ERC721URIStorage {
         _ticketList.push(newTicket);
     }
 
-    // function buy_ticket(uint ticketID) public payable
-    // {
-    //     uint foundTicketIndex = getTicketIndexById(ticketID);
+    function buy_ticket(uint ticketID) public payable
+    {
+        uint foundTicketIndex = getTicketIndexById(ticketID);
 
-    //     require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-    //     require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-    //     payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
-    //     _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
-    //     _ticketList[foundTicketIndex]._onSale = false;
-    //     _ticketsSold.increment();
-    // }
+        //payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+        _ticketList[foundTicketIndex]._onSale = false;
+        _ticketsSold.increment();
+    }
 
     function setTicketSale(bool saleFlag, uint ticketID) public {
         uint foundTicketIndex = getTicketIndexById(ticketID);
