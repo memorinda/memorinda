@@ -48,19 +48,19 @@ function AddEvent() {
 
   const onSubmit = async (data) => {
 
-    // load image to ipfs before connect wallet
-    // const web3Modal = new Web3Modal()
-    // const connection = await web3Modal.connect()
-    // const provider = new ethers.providers.Web3Provider(connection)
-    // const signer = provider.getSigner()
 
     const resp = await eventFactory.methods.createEvent(data.eventName, data.eventDescription, 30, 30, data.eventDate.getTime(), data.eventCapacity).send({from: account});
+    console.log(resp);
+
+    const deployedEventsLength = await eventFactory.methods.deployedEventsLength().call();
+    
+  
     await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);
     }).catch(err => console.log(err))
 
-    navigate("/add-event");
+    navigate(`/create-ticket/${deployedEventsLength}`);
 
   };
   return (

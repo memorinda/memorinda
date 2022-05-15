@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate } from "react-router";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import CreateTicket from "./pages/create-ticket/create-ticket";
 import ErrorPage from "./pages/error-page/error-page.jsx";
 import Events from './pages/events/events.jsx';
 import Login from "./pages/login/login.jsx";
@@ -59,8 +60,18 @@ function App() {
             />
 
             <Route
+              path="/create-ticket"
+              element={<CreateTicket />}
+            />
+
+            <Route
               path="/organizer-login"
               element={<OrganizerLogin />}
+            />
+
+            <Route
+              path="/create-ticket/:id"
+              element={<CreateTicket />}
             />
 
             <Route
