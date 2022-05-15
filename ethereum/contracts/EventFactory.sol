@@ -137,6 +137,12 @@ contract Event is ERC721URIStorage {
         return _ticketList;
     }
 
+    function getTicketOwnerById(uint ticketID) public view returns(address) {
+            uint foundIndex = getTicketIndexById(ticketID);
+
+            return _ticketList[foundIndex]._owner;
+        }
+    
     //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
     function getTicketIndexById(uint ticketID) public view returns(uint){
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
