@@ -72,7 +72,7 @@ function CreateTicket() {
     const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAdress);        
 
 
-    const ticketResponse = await eventContractt.methods.createTicketsByAmount( data.ticketPrice, data.ticketAmount).send({from: account});
+    const ticketResponse = await eventContractt.methods.createTicketsByAmount( ["undefined"], data.ticketPrice, data.ticketAmount).send({from: account});
     console.log(ticketResponse);
     navigate(`/create-ticket/${eventID}`);
 
