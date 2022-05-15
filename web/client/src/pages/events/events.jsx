@@ -57,14 +57,14 @@ function Events() {
     // });
   }
 
-  const buyTicket = (event) => {
+  const buyTicket = async (event) => {
     if(!currentUser){
       navigate("/login")
     }else {
 
       const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAdress);        
 
-      const ticketResponse = await eventContract.methods.buy_ticket(event._eventID).send({from: account});
+      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
 
 
       console.log(event);
