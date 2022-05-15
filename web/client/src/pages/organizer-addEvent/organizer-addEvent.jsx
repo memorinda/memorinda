@@ -66,6 +66,44 @@ function AddEvent() {
   return (
     <div>
       <div className="addEvent-info row align-items-center">
+      <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-1">
+          <button
+            type='button'
+            className="btn btn-block btn-success"
+            onClick={() => {
+              navigate("/login")
+            }}
+          >
+               LOGIN
+          </button>
+        </div>
+      
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={() => {
+              navigate("/signup")
+            }}
+          >
+               SIGN UP
+          </button>
+        </div>
+
+        <div className="col-2">
+          <button
+            type='button'
+            className="btn btn-block btn-secondary"
+            onClick={() => {
+              navigate("/organizer-login")
+            }}
+          >
+               ORGANIZER
+          </button>
+        </div>
+
+      </div>
         <div className="addEvent-headInfo">
           <h2 className="">Organize Event
           </h2>

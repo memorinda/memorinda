@@ -40,9 +40,6 @@ function Events() {
     const resp = await eventFactory.methods.getDeployedEvents().call();
     setAllEvents(resp);
     
-    console.log(resp[0]);
-    console.log(resp[0]._eventTimestamp);
-    console.log(Date(resp[0]._eventTimestamp));
 
     // axios
     // .get(`${process.env.REACT_APP_URL}/events`)
@@ -63,14 +60,19 @@ function Events() {
       navigate("/login")
     }else {
       console.log(eventID);
-      axios
-      .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+
+      
+
+
+      // axios
+      // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
+      // .then((res) => {
+      //   console.log(res.data);
+      // })
+      // .catch((err) => {
+      //   console.log(err);
+      // })
+
 
     }
   }
