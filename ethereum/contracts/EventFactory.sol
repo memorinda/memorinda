@@ -106,18 +106,18 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted {
+    function createTicketsByAmount(/*string[] memory tokenURI, */uint ticketCost, uint ticketAmount) public restricted {
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket(tokenURI[i], ticketCost);
+            createTicket(/*tokenURI[i], */ticketCost);
         }
     }
 
     //create a single ticket
-    function createTicket(string memory tokenURI, uint ticketCost) private {
-        _ticketIds.increment();
-        uint256 newTokenId = _ticketIds.current();
+    function createTicket(/*string memory tokenURI, */uint ticketCost) public {
+        //_ticketIds.increment();
+        //uint256 newTokenId = _ticketIds.current();
         Ticket memory newTicket = Ticket({
-            _ticketID: newTokenId,
+            _ticketID: 1,
             _eventID: _eventID,
             _organizer: _organizerAddress,//owner is manager of the vent at ticket creation
             _owner: _organizerAddress,
@@ -129,18 +129,41 @@ contract Event is ERC721URIStorage {
         _ticketList.push(newTicket);
     }
 
-    // function buy_ticket(uint ticketID) public payable
-    // {
-    //     uint foundTicketIndex = getTicketIndexById(ticketID);
+    function buy_ticket(uint ticketID) public payable
+    {
+        uint foundTicketIndex = getTicketIndexById(ticketID);
 
-    //     require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-    //     require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-    //     payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
-    //     _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
-    //     _ticketList[foundTicketIndex]._onSale = false;
-    //     _ticketsSold.increment();
-    // }
+        //payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+        _ticketList[foundTicketIndex]._onSale = false;
+        _ticketsSold.increment();
+    }
+
+    function getTicketIndexBySale() public view returns(uint){
+        for (uint i = 0; i < _ticketList.length; i++){
+            if(_ticketList[i]._onSale == true){
+                return i;
+            }
+        }
+
+        revert("All tickets are sold");
+    } 
+
+    function buy_ticketFromEventID() public returns(uint)
+    {
+        uint foundTicketIndex = getTicketIndexBySale();
+
+        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        //require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+
+        //payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+        _ticketList[foundTicketIndex]._onSale = false;
+        _ticketsSold.increment();
+    }
 
     function setTicketSale(bool saleFlag, uint ticketID) public {
         uint foundTicketIndex = getTicketIndexById(ticketID);
