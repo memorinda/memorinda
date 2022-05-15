@@ -20,6 +20,7 @@ function Events() {
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
+  
   // const [searchQuery, setSearchQuery] = useState("");
   // const [state, dispatch] = useStore();
   // const { user: currentUser } = state;

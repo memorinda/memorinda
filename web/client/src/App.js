@@ -8,6 +8,7 @@ import Login from "./pages/login/login.jsx";
 import AddEvent from "./pages/organizer-addEvent/organizer-addEvent";
 import OrganizerLogin from "./pages/organizer-login/organizer-login.jsx";
 import Signup from "./pages/signup/signup.jsx";
+import Verify from './pages/verify/verify';
 import { useStore } from "./store/store";
 
 function App() {
@@ -73,6 +74,10 @@ function App() {
              <Route
               path="/events"
               element={<Events />}
+            />
+             <Route
+              path="/verify"
+              element={<Verify />}
             />
             <Route
               path="*"
