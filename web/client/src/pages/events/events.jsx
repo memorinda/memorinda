@@ -57,6 +57,15 @@ function Events() {
     // });
   }
 
+  // const getAllTickets = async () => {
+  //   if (!currentUser) {
+  //     navigate("/login");
+  //   }
+  //   else {
+
+  //   }
+  // }
+
   const buyTicket = async (event) => {
     if(!currentUser){
       navigate("/login")
@@ -65,6 +74,8 @@ function Events() {
       const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAdress);        
 
       const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
+      const allTickets = await eventContract.methods.getAllTickets().call();
+      console.log(allTickets);
 
 
       console.log(event);

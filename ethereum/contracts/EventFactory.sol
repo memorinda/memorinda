@@ -103,14 +103,14 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted{
+    function createTicketsByAmount(/*string[] memory tokenURI,*/ uint ticketCost, uint ticketAmount) public restricted{
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket(tokenURI[i], ticketCost);
+            createTicket(/*tokenURI[i],*/ ticketCost);
         }
     }
 
     //create a single ticket
-    function createTicket(string memory tokenURI, uint ticketCost) public {
+    function createTicket(/*string memory tokenURI,*/ uint ticketCost) public {
         _ticketIds.increment();
         uint256 newTokenId = _ticketIds.current();
         Ticket memory newTicket = Ticket({
@@ -121,8 +121,8 @@ contract Event is ERC721URIStorage {
             _ticketCost: ticketCost,
             _onSale: true
         });
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
+        //_mint(msg.sender, newTokenId);
+        //_setTokenURI(newTokenId, tokenURI);
         _ticketList.push(newTicket);
     }
 
