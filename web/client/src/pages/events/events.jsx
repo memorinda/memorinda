@@ -10,6 +10,7 @@ import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 
+import ABI from '../../abis/Event.json';
 import "./events.scss";
 
 function Events() {
@@ -56,14 +57,17 @@ function Events() {
     // });
   }
 
-  const buyTicket = (eventID) => {
+  const buyTicket = (event) => {
     if(!currentUser){
       navigate("/login")
     }else {
-      console.log(eventID);
 
-      
+      const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAdress);        
 
+      const ticketResponse = await eventContract.methods.buy_ticket(event._eventID).send({from: account});
+
+
+      console.log(event);
 
       // axios
       // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
@@ -159,7 +163,7 @@ function Events() {
               <button
                   type='button'
                   className="col-6 btn btn-block btn-success"
-                  onClick={() => {buyTicket(event._id)}}
+                  onClick={() => {buyTicket(event)}}
                 >
                       BUY TICKET
                 </button>
