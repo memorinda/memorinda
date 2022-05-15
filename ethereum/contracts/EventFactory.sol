@@ -141,8 +141,6 @@ contract Event is ERC721URIStorage {
         _ticketList[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
     }
-<<<<<<< HEAD
-=======
 
     function getTicketIndexBySale() public view returns(uint){
         for (uint i = 0; i < _ticketList.length; i++){
@@ -166,7 +164,6 @@ contract Event is ERC721URIStorage {
         _ticketList[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
     }
->>>>>>> 94bcb75afb8a4b28b09b9d6f40832e4e965efa34
 
     function setTicketSale(bool saleFlag, uint ticketID) public {
         uint foundTicketIndex = getTicketIndexById(ticketID);
