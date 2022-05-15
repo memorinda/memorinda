@@ -55,7 +55,6 @@ function AddEvent() {
     // const signer = provider.getSigner()
 
     const resp = await eventFactory.methods.createEvent(data.eventName, data.eventDescription, 30, 30, data.eventDate.getTime(), data.eventCapacity).send({from: account});
-    console.log(resp);
     await axios.post(`${process.env.REACT_APP_URL}/events/add`, data, {
     }).then(res => {
       console.log(res);
@@ -143,23 +142,6 @@ function AddEvent() {
                   {errors.eventCapacity?.message}
                 </small>
               </div>
-
-               <div className="mt-3 d-flex flex-column">
-                <input
-                  {...register("eventPrice", {
-                      setValueAs: (v) => v === "" ? undefined : parseInt(v, 10),
-                  })}
-                  className="btn-border input-style form-control"
-                  placeholder="Event Price"
-                  type="number"
-                  step="0.001"
-                >
-                </input>
-                <small className="align-self-start error-text">
-                  {errors.eventCapacity?.message}
-                </small>
-              </div>
-
 
               <button
                 className="btn col-2 addEventBtn"
