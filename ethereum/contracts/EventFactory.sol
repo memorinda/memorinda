@@ -11,6 +11,7 @@ contract EventFactory {
     Counters.Counter private _eventID;//keep track of event ids
 
     struct eventProperties {
+        uint256 _eventID;
         string _eventName;
         string _eventDescription;
         address _eventAdress;
@@ -27,6 +28,7 @@ contract EventFactory {
         uint256 currEventID = _eventID.current();
         Event newEvent = new Event(currEventID);
         idToEvent[currEventID] = eventProperties({
+            _eventID: currEventID,
             _eventName: eventName,
             _eventDescription: eventDescription,
             _eventAdress: address(newEvent),
@@ -35,6 +37,15 @@ contract EventFactory {
             _eventTimestamp: eventTimestamp,
             _eventCapacity: eventCapacity
         });
+
+        organizerToEvent[msg.sender].push(newEvent);
+
+    }
+
+    function deployedEventsLength() public view returns (uint256) {
+        uint totalEvents = _eventID.current();
+
+        return totalEvents;
     }
 
     function getDeployedEvents() public view  returns (eventProperties[] memory) {
@@ -45,6 +56,17 @@ contract EventFactory {
         }
         return events;
     }
+
+    function getEventsByOrganizer(address organizerAddress) public view returns(Event[] memory) {
+        return organizerToEvent[organizerAddress];
+    }
+
+    function getEventsByID(uint256 eventID) public view returns(eventProperties memory) {
+        return idToEvent[eventID];
+    }
+
+
+
 
 }
 
@@ -82,7 +104,7 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restriced {
+    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted {
         for (uint i = 0; i < ticketAmount; i++) {
             createTicket(tokenURI[i], ticketCost);
         }
@@ -100,23 +122,23 @@ contract Event is ERC721URIStorage {
             _ticketCost: ticketCost,
             _onSale: true
         });
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
+        //_mint(msg.sender, newTokenId);
+        //_setTokenURI(newTokenId, tokenURI);
         _ticketList.push(newTicket);
     }
 
-    function buy_ticket(uint ticketID) public payable
-    {
-        uint foundTicketIndex = getTicketIndexById(ticketID);
+    // function buy_ticket(uint ticketID) public payable
+    // {
+    //     uint foundTicketIndex = getTicketIndexById(ticketID);
 
-        require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+    //     require(_ticketList[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+    //     require(msg.value == _ticketList[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-        payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
-        _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
-        _ticketList[foundTicketIndex]._onSale = false;
-        _ticketsSold.increment();
-    }
+    //     payable(_ticketList[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+    //     _ticketList[foundTicketIndex]._owner = msg.sender;//change owner to buyer
+    //     _ticketList[foundTicketIndex]._onSale = false;
+    //     _ticketsSold.increment();
+    // }
 
     function setTicketSale(bool saleFlag, uint ticketID) public {
         uint foundTicketIndex = getTicketIndexById(ticketID);
@@ -137,7 +159,7 @@ contract Event is ERC721URIStorage {
         return _ticketList;
     }
 
-    //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
+    // //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
     function getTicketIndexById(uint ticketID) public view returns(uint){
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
             if(_ticketList[i]._ticketID == ticketID)
