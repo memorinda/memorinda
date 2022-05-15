@@ -28,7 +28,7 @@ contract EventFactory {
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
-        Event newEvent = new Event(currEventID);
+        Event newEvent = new Event(currEventID, msg.sender);
         idToEvent[currEventID] = eventProperties({
             _eventID: currEventID,
             _eventName: eventName,
@@ -66,10 +66,6 @@ contract EventFactory {
     function getEventsByID(uint256 eventID) public view returns(eventProperties memory) {
         return idToEvent[eventID];
     }
-
-
-
-
 }
 
 contract Event is ERC721URIStorage {
@@ -93,8 +89,9 @@ contract Event is ERC721URIStorage {
 
     //name description capacity eventdate location price
 
-    constructor (uint256 eventID) ERC721("Memorinda", "MEM") {
+    constructor (uint256 eventID, address creator) ERC721("Memorinda", "MEM") {
         _eventID = eventID;
+        _organizerAddress = creator;
     }
 
     /*
@@ -106,18 +103,18 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(/*string[] memory tokenURI, */uint ticketCost, uint ticketAmount) public restricted {
+    function createTicketsByAmount(/*string[] memory tokenURI,*/ uint ticketCost, uint ticketAmount) public restricted{
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket(/*tokenURI[i], */ticketCost);
+            createTicket(/*tokenURI[i],*/ ticketCost);
         }
     }
 
     //create a single ticket
-    function createTicket(/*string memory tokenURI, */uint ticketCost) public {
-        //_ticketIds.increment();
-        //uint256 newTokenId = _ticketIds.current();
+    function createTicket(/*string memory tokenURI,*/ uint ticketCost) public {
+        _ticketIds.increment();
+        uint256 newTokenId = _ticketIds.current();
         Ticket memory newTicket = Ticket({
-            _ticketID: 1,
+            _ticketID: newTokenId,
             _eventID: _eventID,
             _organizer: _organizerAddress,//owner is manager of the vent at ticket creation
             _owner: _organizerAddress,
