@@ -105,7 +105,8 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted{
+
+    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted {
         for (uint i = 0; i < ticketAmount; i++) {
             createTicket(tokenURI[i], ticketCost);
         }
@@ -180,17 +181,19 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTickets() public view returns(Ticket[] memory) {
-
         uint256 totalNumTickets = _ticketsSold.current();
         Ticket[] memory postTickets = new Ticket[](totalNumTickets);
         uint256 currInd = 0;
         for (uint256 i=0; i< totalNumTickets; i++) {
             if (idToTicket[i+1]._onSale == true) {
                 postTickets[currInd] = idToTicket[i+1];
-            }
+
+    function getTicketOwnerById(uint ticketID) public view returns(address) {
+            uint foundIndex = getTicketIndexById(ticketID);
+
+            return _ticketList[foundIndex]._owner;
         }
-        return postTickets;
-    }
+    
 
     /*
         MEMORINDA FUNCTIONS
