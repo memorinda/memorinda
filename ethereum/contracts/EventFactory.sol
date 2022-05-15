@@ -22,17 +22,10 @@ contract EventFactory {
 
     mapping(uint256 => eventProperties) private idToEvent;
 
-    mapping(address => Event[]) private organizerToEvent;
-
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
-<<<<<<< HEAD
-        Event newEvent = new Event(currEventID, msg.sender);
-        
-=======
         Event newEvent = new Event(currEventID);
->>>>>>> 5475a24 (ERC721 Standard.)
         idToEvent[currEventID] = eventProperties({
             _eventName: eventName,
             _eventDescription: eventDescription,
@@ -42,8 +35,6 @@ contract EventFactory {
             _eventTimestamp: eventTimestamp,
             _eventCapacity: eventCapacity
         });
-
-        organizerToEvent[msg.sender].push(newEvent);
     }
 
     function getDeployedEvents() public view  returns (eventProperties[] memory) {
@@ -55,10 +46,6 @@ contract EventFactory {
         return events;
     }
 
-    function getEventsByOrganizer(address organizerAddress) public view returns(Event[] memory) {
-        return organizerToEvent[organizerAddress];
-    }
-
 }
 
 contract Event is ERC721URIStorage {
@@ -66,6 +53,7 @@ contract Event is ERC721URIStorage {
     uint256 public _eventID;
     address public _organizerAddress;
     using Counters for Counters.Counter;
+
     Counters.Counter private _ticketIds;
     Counters.Counter private _ticketsSold;
     Ticket[] public _ticketList;
@@ -78,22 +66,24 @@ contract Event is ERC721URIStorage {
         uint _ticketCost;
         bool _onSale;
     }
+
     //name description capacity eventdate location price
 
     constructor (uint256 eventID) ERC721("Memorinda", "MEM") {
         _eventID = eventID;
     }
 
-<<<<<<< HEAD
-    function createTicketsByAmount(uint ticketCost, uint ticketAmount) public {
-=======
     /*
         TICKET FUNCTIONS
     */
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public {
->>>>>>> 5475a24 (ERC721 Standard.)
-        for (uint i = 0; i < ticketAmount; i++)
-        {
+
+    modifier restricted() {
+        require(msg.sender == _organizerAddress);
+        _;
+    }
+
+    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restriced {
+        for (uint i = 0; i < ticketAmount; i++) {
             createTicket(tokenURI[i], ticketCost);
         }
     }
@@ -149,19 +139,15 @@ contract Event is ERC721URIStorage {
 
     //this is used instead of returning ticket, because solidity does not allow editing storage variable with memory variable. or I didnt manage it
     function getTicketIndexById(uint ticketID) public view returns(uint){
-        Ticket memory foundTicket;
          for (uint i = 0; i < _ticketList.length; i++) {//find ticket index by id
             if(_ticketList[i]._ticketID == ticketID)
             {
-                foundTicket = _ticketList[i];
                 return i;
             }
         }
 
         revert("Ticket not found");
     }
-<<<<<<< HEAD
-=======
 
     /*
         MEMORINDA FUNCTIONS
@@ -243,5 +229,4 @@ contract Event is ERC721URIStorage {
         }
         revert("Memorinda not found");
     }
->>>>>>> 5475a24 (ERC721 Standard.)
 }
