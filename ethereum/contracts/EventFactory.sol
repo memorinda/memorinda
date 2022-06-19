@@ -14,7 +14,7 @@ contract EventFactory {
         uint256 _eventID;
         string _eventName;
         string _eventDescription;
-        address _eventAdress;
+        address _eventAddress;
         int _longtitude;
         int _latitude;
         int _eventTimestamp;
@@ -33,7 +33,7 @@ contract EventFactory {
             _eventID: currEventID,
             _eventName: eventName,
             _eventDescription: eventDescription,
-            _eventAdress: address(newEvent),
+            _eventAddress: address(newEvent),
             _longtitude: longtitude,
             _latitude: latitude,
             _eventTimestamp: eventTimestamp,

@@ -40,10 +40,14 @@ function Events() {
 
     const resp = await eventFactory.methods.getDeployedEvents().call();
     setAllEvents(resp);
+<<<<<<< Updated upstream
     
     console.log(resp[0]);
     console.log(resp[0]._eventTimestamp);
     console.log(Date(resp[0]._eventTimestamp));
+=======
+    console.log(resp);
+>>>>>>> Stashed changes
 
     // axios
     // .get(`${process.env.REACT_APP_URL}/events`)
@@ -143,7 +147,7 @@ function Events() {
               </div>
               <div className="row align-self-center">
                 <div className="col-5 d-flex justify-content-start align-items-center">
-                   <h6><span><FaRegCalendarTimes /></span>  {Date(event._eventTimestamp).slice(0,25)} </h6>
+                   <h6><span><FaRegCalendarTimes /></span>  {(new Date(parseInt(event._eventTimestamp)).toString()).slice(0, 21)} </h6>
                 </div>
                 <div className="col-5 d-flex justify-content-start align-items-center">
                   <h6> <span> <GrLocation /></span> {event._longtitude} , {event._latitude}</h6>
