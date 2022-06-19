@@ -19,7 +19,6 @@ const addEventSchema = z
     eventCapacity: z.number().positive(),
     eventDate: z.date(),
     eventLocation: z.string().nonempty(),
-    eventPrice: z.number().positive(),
   });
 
 
@@ -65,7 +64,9 @@ function AddEvent() {
   };
   return (
     <div>
+
       <div className="addEvent-info row align-items-center">
+     
         <div className="addEvent-headInfo">
           <h2 className="">Organize Event
           </h2>

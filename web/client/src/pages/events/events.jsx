@@ -10,6 +10,7 @@ import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 
+import ABI from '../../abis/Event.json';
 import "./events.scss";
 
 function Events() {
@@ -40,14 +41,7 @@ function Events() {
 
     const resp = await eventFactory.methods.getDeployedEvents().call();
     setAllEvents(resp);
-<<<<<<< Updated upstream
-    
-    console.log(resp[0]);
-    console.log(resp[0]._eventTimestamp);
-    console.log(Date(resp[0]._eventTimestamp));
-=======
-    console.log(resp);
->>>>>>> Stashed changes
+
 
     // axios
     // .get(`${process.env.REACT_APP_URL}/events`)
@@ -63,19 +57,38 @@ function Events() {
     // });
   }
 
-  const buyTicket = (eventID) => {
+  // const getAllTickets = async () => {
+  //   if (!currentUser) {
+  //     navigate("/login");
+  //   }
+  //   else {
+
+  //   }
+  // }
+
+  const buyTicket = async (event) => {
     if(!currentUser){
       navigate("/login")
     }else {
-      console.log(eventID);
-      axios
-      .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+
+      const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAdress);        
+
+      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
+      const allTickets = await eventContract.methods.getAllTickets().call();
+      console.log(allTickets);
+
+
+      console.log(event);
+
+      // axios
+      // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
+      // .then((res) => {
+      //   console.log(res.data);
+      // })
+      // .catch((err) => {
+      //   console.log(err);
+      // })
+
 
     }
   }
@@ -161,7 +174,7 @@ function Events() {
               <button
                   type='button'
                   className="col-6 btn btn-block btn-success"
-                  onClick={() => {buyTicket(event._id)}}
+                  onClick={() => {buyTicket(event)}}
                 >
                       BUY TICKET
                 </button>
