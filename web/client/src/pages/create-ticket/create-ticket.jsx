@@ -11,6 +11,7 @@ import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 
 import ABI from '../../abis/Event.json';
+import { userLogout } from '../../store/userReducer';
 
 const createTicketSchema = z
   .object({
@@ -38,12 +39,13 @@ function CreateTicket() {
   });
 
   const navigate = useNavigate();
+  const [, dispatch] = useStore();
 
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const [state] = useStore();
-  const { user: currentUser } = state;
+  const { organizerUser: currentUser } = state;
 
   const eventID = window.location.pathname.slice(15);
 
@@ -79,6 +81,19 @@ function CreateTicket() {
   };
   return (
     <div>
+      <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={() => {
+              dispatch(userLogout())
+            }}
+          >
+               LOGOUT
+          </button>
+        </div>
+      </div>
       <div className="addEvent-info row align-items-center">
 
       <div className="event-navbar row justify-content-end align-items-center">

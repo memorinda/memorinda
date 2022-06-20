@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useStore } from "../../store/store";
-import { userLogin } from "../../store/userReducer";
+import { organizerLogin } from "../../store/userReducer";
 import "./organizer-login.css";
 
 const loginSchema = z
@@ -48,7 +48,7 @@ function OrganizerLogin() {
           setErrorMessage("You logged in succesfully");
           const dbUser = res.data;
           console.log("login user:", dbUser);
-          dispatch(userLogin(dbUser));
+          dispatch(organizerLogin(dbUser));
           navigate("/organizer-events");
         } else {
           setErrorMessage("Error! Please try again.");
@@ -97,14 +97,27 @@ function OrganizerLogin() {
                   </small>
                 </div>
 
-                <div className="mt-5 row text-center justify-content-center">
+                <div className="mt-4 row text-center justify-content-center">
                   <button
                     type='submit'
                     className="col-6 btn btn-block btn-warning"
                   >
-                      ORGANIZER SIGN IN
+                      SIGN IN
                   </button>
                 </div>
+
+                <div className="mt-3 row text-center justify-content-center">
+                  <div className="col-12">
+                      <span
+                        className="link-line-gap d-flex justify-content-center"
+                      > Not an organizer?
+                    
+                        <Link to="/login">
+                          <p> Sign in as User </p>
+                        </Link>
+                      </span>
+                    </div>
+                  </div>
               </form>
             </div>
           </div>

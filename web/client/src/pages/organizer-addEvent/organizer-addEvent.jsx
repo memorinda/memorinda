@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useStore } from "../../store/store";
 import "./organizer-addEvent.css";
 
-import { userLogout } from '../../store/userReducer';
+
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { userLogout } from '../../store/userReducer';
 //import { ethers } from 'ethers';
 
 const addEventSchema = z
@@ -24,7 +25,6 @@ const addEventSchema = z
 
 function AddEvent() {
 
-  const [, dispatch] = useStore();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
 
@@ -38,12 +38,14 @@ function AddEvent() {
   });
 
   const navigate = useNavigate();
+  const [, dispatch] = useStore();
+
 
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const [state] = useStore();
-  const { user: currentUser } = state;
+  const { organizerUser: currentUser } = state;
 
 
   const onSubmit = async (data) => {
@@ -65,22 +67,20 @@ function AddEvent() {
   };
   return (
     <div>
-
-<div className="event-navbar row justify-content-end align-items-center">
-        <div className="col-1">
+     <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-2">
           <button
             type='button'
-            className="btn btn-block btn-success"
+            className=" btn btn-block btn-primary"
             onClick={() => {
-              dispatch(userLogout());
-              navigate("/organizer-login");
+              dispatch(userLogout())
             }}
           >
                LOGOUT
           </button>
         </div>
-
       </div>
+
       <div className="addEvent-info row align-items-center">
      
         <div className="addEvent-headInfo">

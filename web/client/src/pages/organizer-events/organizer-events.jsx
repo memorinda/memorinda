@@ -16,7 +16,7 @@ import { userLogout } from '../../store/userReducer';
 
 function OrganizerEvents() {
   const [state] = useStore();
-  const { user: currentUser } = state;
+  const { organizerUser: currentUser } = state;
   const [, dispatch] = useStore();
 
   const [allOrganizerEvents, setAllOrganizerEvents] = useState([])
@@ -52,7 +52,7 @@ function OrganizerEvents() {
      <div className="event-navbar row justify-content-end align-items-center">
 
      
-     <div className="col-1">
+     <div className="col-2">
           <button
             type='button'
             className="btn btn-block btn-success"
@@ -64,28 +64,16 @@ function OrganizerEvents() {
           </button>
         </div>
         
-        <div className="col-1">
-          <button
-            type='button'
-            className="btn btn-block btn-success"
-            onClick={() => {
-              dispatch(userLogout());
-              navigate("/login");
-            }}
-          >
-               LOGOUT
-          </button>
-        </div>
-
         <div className="col-2">
           <button
             type='button'
             className="btn btn-block btn-secondary"
             onClick={() => {
-              navigate("/organizer-login")
+              dispatch(userLogout());
+              navigate("/organizer-login");
             }}
           >
-               ORGANIZER
+               LOGOUT
           </button>
         </div>
 
