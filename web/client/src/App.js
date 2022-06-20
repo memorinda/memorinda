@@ -9,6 +9,7 @@ import Login from "./pages/login/login.jsx";
 import AddEvent from "./pages/organizer-addEvent/organizer-addEvent";
 import OrganizerLogin from "./pages/organizer-login/organizer-login.jsx";
 import Signup from "./pages/signup/signup.jsx";
+import UploadPhoto from './pages/upload-photo/upload-photo';
 import Verify from './pages/verify/verify';
 import { useStore } from "./store/store";
 
@@ -89,6 +90,10 @@ function App() {
              <Route
               path="/verify"
               element={<Verify />}
+            />
+            <Route
+              path="/upload-photo"
+              element={<UploadPhoto />}
             />
             <Route
               path="*"
