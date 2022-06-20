@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from 'react-router';
 import { z } from "zod";
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
@@ -29,6 +30,7 @@ function Verify() {
     resolver: zodResolver(verifySchema),
     mode: "all",
   });
+  const navigate = useNavigate();
 
   const [, dispatch] = useStore();
 
@@ -89,6 +91,18 @@ function Verify() {
                       VERIFY
                   </button>
                 </div>
+
+                <div className="mt-5 row text-center justify-content-center">
+                  <button
+                    type='button'
+                    className="btn col-4 btn-block btn-secondary"
+                    onClick={() => {
+                      navigate("/organizer-events");
+                    }}
+                  >
+                      GO BACK
+                  </button>
+              </div>
               
               </form>
             </div>
