@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract EventFactory {
 
@@ -216,15 +217,19 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTickets() public view returns(Ticket[] memory) {
-        
-        uint256 totalNumTickets = _ticketsSold.current();
+
+        uint256 totalNumTickets = _ticketIds.current();
         Ticket[] memory postTickets = new Ticket[](totalNumTickets);
         uint256 currInd = 0;
+        
+
         for (uint256 i=0; i< totalNumTickets; i++) {
             if (idToTicket[i+1]._onSale == true) {
                 postTickets[currInd] = idToTicket[i+1];
+                currInd = currInd + 1;
             }
         }
+
         return postTickets;
     }
 
