@@ -71,12 +71,12 @@ function CreateTicket() {
     console.log(eventID);
     const eventProperties = await eventFactory.methods.getEventsByID(parseInt(eventID)).call();
     console.log(eventProperties);
-    const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAdress);        
+    const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAddress);        
 
-
-    const ticketResponse = await eventContractt.methods.createTicketsByAmount( ["undefined"], data.ticketPrice, data.ticketAmount).send({from: account});
+    console.log(eventContractt);
+    const ticketResponse = await eventContractt.methods.createTicketsByAmount(data.ticketPrice, data.ticketAmount).send({from: account});
     console.log(ticketResponse);
-    navigate(`/create-ticket/${eventID}`);
+    navigate("/organizer-events");
 
   };
   return (
@@ -95,6 +95,20 @@ function CreateTicket() {
         </div>
       </div>
       <div className="addEvent-info row align-items-center">
+
+      <div className="event-navbar row justify-content-end align-items-center">
+      <div className="col-1">
+          <button
+            type='button'
+            className="btn btn-block btn-success"
+            onClick={() => {
+              navigate("/organizer-events");
+            }}
+          >
+               My Events
+          </button>
+        </div>
+      </div>
         <div className="addEvent-headInfo">
           <h2 className="">Create Tickets
           </h2>

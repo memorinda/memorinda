@@ -1,131 +1,79 @@
-import { useEffect, useState } from "react";
+import axios from 'axios';
+import React, { useEffect, useState } from "react";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GrLocation } from "react-icons/gr";
 // import { Container, Nav, NavDropdown } from "react-bootstrap";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
+import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
-import { useStore } from '../../store/store';
 
 import ABI from '../../abis/Event.json';
+import "./organizer-events.scss";
 import { userLogout } from '../../store/userReducer';
-import "./events.scss";
 
-function Events() {
+function OrganizerEvents() {
   const [state] = useStore();
-  const { user: currentUser } = state;
-
+  const { organizerUser: currentUser } = state;
   const [, dispatch] = useStore();
 
-  const [allEvents, setAllEvents] = useState([])
+  const [allOrganizerEvents, setAllOrganizerEvents] = useState([])
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
-  
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [state, dispatch] = useStore();
-  // const { user: currentUser } = state;
-  // // const [errorMessage, setErrorMessage] = useState();
-  // const onSubmit = useCallback((data) => {
-  //   // dispatch(userLogout());
-  //   navigate("/login");
-  // }, [dispatch, navigate]);
 
-
-
-  // async function handleSearch() {
-  //   navigate(`/eventSearch/${searchQuery}`);
-  // }
 
   const fetchEvents = async () => {
+    console.log(account);
+    //console.log(await eventFactory.methods.getAllTickets().call());
+    const eventIDs = await eventFactory.methods.getEventsByOrganizer(account).call();
+    const events = await eventFactory.methods.getDeployedEvents().call();
 
-    const resp = await eventFactory.methods.getDeployedEvents().call();
-    setAllEvents(resp);
-
-
-    // axios
-    // .get(`${process.env.REACT_APP_URL}/events`)
-    // .then((res) => {
-    //   console.log(res.data);
-    //   setAllEvents(res.data)
-     
-    // })
-    // .catch((err) => {
-    //   console.log("Error:", err);
-    //   navigate("/error")
-      
-    // });
-  }
-
-  // const getAllTickets = async () => {
-  //   if (!currentUser) {
-  //     navigate("/login");
-  //   }
-  //   else {
-
-  //   }
-  // }
-
-  const buyTicket = async (event) => {
-    if(!currentUser){
-      navigate("/login")
-    }else {
-
-      const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);        
-
-      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
-      const allTickets = await eventContract.methods.getAllTickets().call();
-      console.log(allTickets);
-
-
-      console.log(event);
-
-      // axios
-      // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
-      // .then((res) => {
-      //   console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   console.log(err);
-      // })
-
-
+    const organizerEvents = [];
+    for (let i = 0; i < events.length; i++) {
+      for (let j = 0; j < eventIDs.length; j++) {
+        if (events[i]._eventAddress === eventIDs[j]) {
+          organizerEvents.push(events[i]);
+        }
+      }
     }
+    setAllOrganizerEvents(organizerEvents);
+    console.log(organizerEvents);
   }
-
 
   useEffect(() => {
-    console.log(currentUser)
     fetchEvents();
-  }, [])
+  }, [account])
 
   return (
     <div className="events">
-    { !currentUser ? 
      <div className="event-navbar row justify-content-end align-items-center">
+
+     
+     <div className="col-1">
+          <button
+            type='button'
+            className="btn btn-block btn-success"
+            onClick={() => {
+              navigate("/add-event");
+            }}
+          >
+               Add Event
+          </button>
+        </div>
+        
         <div className="col-1">
           <button
             type='button'
             className="btn btn-block btn-success"
             onClick={() => {
-              navigate("/login")
+              dispatch(userLogout());
+              navigate("/login");
             }}
           >
-               LOGIN
-          </button>
-        </div>
-      
-        <div className="col-2">
-          <button
-            type='button'
-            className=" btn btn-block btn-primary"
-            onClick={() => {
-              navigate("/signup")
-            }}
-          >
-               SIGN UP
+               LOGOUT
           </button>
         </div>
 
@@ -134,41 +82,22 @@ function Events() {
             type='button'
             className="btn btn-block btn-secondary"
             onClick={() => {
-              dispatch(userLogout())
               navigate("/organizer-login")
             }}
           >
                ORGANIZER
           </button>
         </div>
-      </div> 
-      : 
-      <div className="event-navbar row justify-content-end align-items-center">
-        <div className="col-2">
-          <button
-            type='button'
-            className=" btn btn-block btn-primary"
-            onClick={(e) => {
-              e.preventDefault();
-              console.log("ashdfoasfhh")
-              dispatch(userLogout())
-              navigate("/events")
-            }}
-          >
-               LOGOUT
-          </button>
-        </div>
-      </div>
-    }
 
+      </div>
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
         <h3 >Upcoming Events</h3>
         </div>
       </div>
 
-    {allEvents.length > 0 ? 
-      allEvents.map(event => {
+    {allOrganizerEvents.length > 0 ? 
+      allOrganizerEvents.map(event => {
         return(
           <div key={event._eventAddress} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
@@ -195,15 +124,6 @@ function Events() {
                 </div>
                  
               </div>
-              <div className="row mt-4 justify-content-center">
-              <button
-                  type='button'
-                  className="col-6 btn btn-block btn-success"
-                  onClick={() => {buyTicket(event)}}
-                >
-                      BUY TICKET
-                </button>
-              </div>
             </div>
             
            
@@ -225,4 +145,4 @@ function Events() {
   );
 }
 
-export default Events;
+export default OrganizerEvents;

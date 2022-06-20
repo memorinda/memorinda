@@ -49,7 +49,7 @@ function OrganizerLogin() {
           const dbUser = res.data;
           console.log("login user:", dbUser);
           dispatch(organizerLogin(dbUser));
-          navigate("/add-event");
+          navigate("/organizer-events");
         } else {
           setErrorMessage("Error! Please try again.");
         }
