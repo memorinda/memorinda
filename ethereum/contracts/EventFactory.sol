@@ -121,9 +121,9 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted{
+    function createTicketsByAmount(uint ticketCost, uint ticketAmount) public restricted{
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket(tokenURI[i], ticketCost);
+            createTicket("a", ticketCost);
         }
     }
 
