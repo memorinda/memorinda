@@ -89,6 +89,11 @@ contract Event is ERC721URIStorage {
     Counters.Counter private _ticketsSold;
 
     mapping(uint256 => Ticket) private idToTicket;
+    mapping(address => UserTickets) private userToTicketStruct;
+
+    struct UserTickets{
+        Ticket[] _tickets;
+    }
 
     struct Ticket {
         uint _ticketID;
@@ -136,6 +141,17 @@ contract Event is ERC721URIStorage {
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
         idToTicket[newTokenId] = newTicket;
+        userToTicketStruct[newTicket._owner]._tickets.push(newTicket);
+    }
+
+    function deleteTicketFromOwner (address ownerAddress, uint ticketID) private
+    {
+        for(uint index=0;index<userToTicketStruct[ownerAddress]._tickets.length;index++){
+            if(userToTicketStruct[ownerAddress]._tickets[index]._ticketID == ticketID){
+                delete userToTicketStruct[ownerAddress]._tickets[index];
+                break;
+            }
+        }
     }
 
     function buy_ticket(uint256 ticketID) public payable {
@@ -145,8 +161,13 @@ contract Event is ERC721URIStorage {
         require(msg.value == _currTicket._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
         payable(_currTicket._owner).transfer(msg.value); //transfer money to current owner
+        address oldOwner = _currTicket._owner;
         _currTicket._owner = msg.sender; //change owner to buyer
         _currTicket._onSale = false;
+
+        deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
+        userToTicketStruct[msg.sender]._tickets.push(_currTicket);
+
         _ticketsSold.increment();
     }
 
@@ -168,9 +189,14 @@ contract Event is ERC721URIStorage {
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        address oldOwner = idToTicket[foundTicketIndex]._owner;
+
         idToTicket[foundTicketIndex]._owner = msg.sender;//change owner to buyer
         idToTicket[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
+
+        deleteTicketFromOwner(oldOwner, foundTicketIndex);//change owners in map
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[foundTicketIndex]);
 
         return foundTicketIndex;
     }
@@ -190,7 +216,7 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTickets() public view returns(Ticket[] memory) {
-
+        
         uint256 totalNumTickets = _ticketsSold.current();
         Ticket[] memory postTickets = new Ticket[](totalNumTickets);
         uint256 currInd = 0;
@@ -200,6 +226,11 @@ contract Event is ERC721URIStorage {
             }
         }
         return postTickets;
+    }
+
+    function getAllTicketsByUserAddress(address userAddress) public view returns(Ticket[] memory) {
+
+        return  userToTicketStruct[userAddress]._tickets;
     }
 
     /*
