@@ -1,18 +1,16 @@
-import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GrLocation } from "react-icons/gr";
 // import { Container, Nav, NavDropdown } from "react-bootstrap";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
-import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { useStore } from '../../store/store';
 
-import ABI from '../../abis/Event.json';
-import "./organizer-events.scss";
 import { userLogout } from '../../store/userReducer';
+import "./organizer-events.scss";
 
 function OrganizerEvents() {
   const [state] = useStore();
@@ -51,7 +49,17 @@ function OrganizerEvents() {
     <div className="events">
      <div className="event-navbar row justify-content-end align-items-center">
 
-     
+     <div className="col-2">
+          <button
+            type='button'
+            className="btn btn btn-primary"
+            onClick={() => {
+              navigate("/verify");
+            }}
+          >
+               Verify A Ticket
+          </button>
+        </div>
      <div className="col-2">
           <button
             type='button'
