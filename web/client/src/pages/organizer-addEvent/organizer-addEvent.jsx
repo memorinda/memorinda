@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useStore } from "../../store/store";
 import "./organizer-addEvent.css";
@@ -10,6 +10,7 @@ import "./organizer-addEvent.css";
 
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { userLogout } from '../../store/userReducer';
 //import { ethers } from 'ethers';
 
 const addEventSchema = z
@@ -37,12 +38,14 @@ function AddEvent() {
   });
 
   const navigate = useNavigate();
+  const [, dispatch] = useStore();
+
 
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const [state] = useStore();
-  const { user: currentUser } = state;
+  const { organizerUser: currentUser } = state;
 
 
   const onSubmit = async (data) => {
@@ -64,6 +67,19 @@ function AddEvent() {
   };
   return (
     <div>
+     <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={() => {
+              dispatch(userLogout())
+            }}
+          >
+               LOGOUT
+          </button>
+        </div>
+      </div>
 
       <div className="addEvent-info row align-items-center">
      

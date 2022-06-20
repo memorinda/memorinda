@@ -1,21 +1,23 @@
-import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GrLocation } from "react-icons/gr";
 // import { Container, Nav, NavDropdown } from "react-bootstrap";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
-import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { useStore } from '../../store/store';
 
 import ABI from '../../abis/Event.json';
+import { userLogout } from '../../store/userReducer';
 import "./events.scss";
 
 function Events() {
   const [state] = useStore();
   const { user: currentUser } = state;
+
+  const [, dispatch] = useStore();
 
   const [allEvents, setAllEvents] = useState([])
   const navigate = useNavigate();
@@ -92,12 +94,16 @@ function Events() {
 
     }
   }
+
+
   useEffect(() => {
+    console.log(currentUser)
     fetchEvents();
   }, [])
 
   return (
     <div className="events">
+    { !currentUser ? 
      <div className="event-navbar row justify-content-end align-items-center">
         <div className="col-1">
           <button
@@ -128,14 +134,33 @@ function Events() {
             type='button'
             className="btn btn-block btn-secondary"
             onClick={() => {
+              dispatch(userLogout())
               navigate("/organizer-login")
             }}
           >
                ORGANIZER
           </button>
         </div>
-
+      </div> 
+      : 
+      <div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("ashdfoasfhh")
+              dispatch(userLogout())
+              navigate("/events")
+            }}
+          >
+               LOGOUT
+          </button>
+        </div>
       </div>
+    }
+
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
         <h3 >Upcoming Events</h3>
