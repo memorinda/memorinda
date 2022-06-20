@@ -20,6 +20,7 @@ contract EventFactory {
         int _latitude;
         int _eventTimestamp;
         int _eventCapacity;
+        address _organizerAddress;
     }
 
     mapping(uint256 => eventProperties) private idToEvent;
@@ -41,7 +42,8 @@ contract EventFactory {
             _longtitude: longtitude,
             _latitude: latitude,
             _eventTimestamp: eventTimestamp,
-            _eventCapacity: eventCapacity
+            _eventCapacity: eventCapacity,
+            _organizerAddress: msg.sender
         });
 
         idToEvent[currEventID] = eventProp;
@@ -78,6 +80,29 @@ contract EventFactory {
         return idToEvent[eventID];
     }
 
+    // function deleteAllEvents() private {
+    //     uint eventsLength = deployedEventsLength();
+    //     for (uint i = 0; i < eventsLength; i++) {
+    //         delete idToEvent[i];
+    //     }
+    //     eventProperties[] memory deployedEvents = getDeployedEvents();
+
+    //     for (uint i = 0; i < deployedEvents.length; i++) {
+    //         delete organizerToEvent[deployedEvents[i]._organizerAddress];
+    //         delete organizerToEventProperties[deployedEvents[i]._organizerAddress];
+    //     }
+    // }
+
+    //  function deleteMyEvents() private {
+    //     uint eventsLength = deployedEventsLength();
+    //     for (uint i = 0; i < eventsLength; i++) {
+    //         delete idToEvent[i];
+    //     }
+    //     address myAddress = address(0x3049a7bf655c9300edf3fc570ae896d8468732fc);
+    //     delete organizerToEvent[myAddress];
+    //     delete organizerToEventProperties[myAddress];
+        
+    // }
 }
 
 contract Event is ERC721URIStorage {

@@ -6,6 +6,7 @@ import CreateTicket from "./pages/create-ticket/create-ticket";
 import ErrorPage from "./pages/error-page/error-page.jsx";
 import Events from './pages/events/events.jsx';
 import Login from "./pages/login/login.jsx";
+import OrganizerEvents from "./pages/organizer-events/organizer-events";
 import AddEvent from "./pages/organizer-addEvent/organizer-addEvent";
 import OrganizerLogin from "./pages/organizer-login/organizer-login.jsx";
 import Signup from "./pages/signup/signup.jsx";
@@ -86,6 +87,10 @@ function App() {
              <Route
               path="/events"
               element={<Events />}
+            />
+             <Route
+              path="/organizer-events"
+              element={<OrganizerEvents />}
             />
              <Route
               path="/verify"

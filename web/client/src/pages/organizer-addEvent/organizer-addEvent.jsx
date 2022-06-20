@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useStore } from "../../store/store";
 import "./organizer-addEvent.css";
 
-
+import { userLogout } from '../../store/userReducer';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 //import { ethers } from 'ethers';
@@ -24,6 +24,7 @@ const addEventSchema = z
 
 function AddEvent() {
 
+  const [, dispatch] = useStore();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
 
@@ -65,6 +66,21 @@ function AddEvent() {
   return (
     <div>
 
+<div className="event-navbar row justify-content-end align-items-center">
+        <div className="col-1">
+          <button
+            type='button'
+            className="btn btn-block btn-success"
+            onClick={() => {
+              dispatch(userLogout());
+              navigate("/organizer-login");
+            }}
+          >
+               LOGOUT
+          </button>
+        </div>
+
+      </div>
       <div className="addEvent-info row align-items-center">
      
         <div className="addEvent-headInfo">
