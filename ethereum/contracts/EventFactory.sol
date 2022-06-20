@@ -25,12 +25,15 @@ contract EventFactory {
 
     mapping(address => Event[]) private organizerToEvent;
 
+    mapping(address => eventProperties[]) private organizerToEventProperties;
+
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
         Event newEvent = new Event(currEventID, msg.sender);
-        idToEvent[currEventID] = eventProperties({
-            _eventID: currEventID,
+
+        eventProperties memory eventProp = eventProperties({
+             _eventID: currEventID,
             _eventName: eventName,
             _eventDescription: eventDescription,
             _eventAddress: address(newEvent),
@@ -40,7 +43,10 @@ contract EventFactory {
             _eventCapacity: eventCapacity
         });
 
+        idToEvent[currEventID] = eventProp;
+
         organizerToEvent[msg.sender].push(newEvent);
+        organizerToEventProperties[msg.sender].push(eventProp);
 
     }
 
@@ -57,6 +63,10 @@ contract EventFactory {
             events[i] = idToEvent[i+1];
         }
         return events;
+    }
+
+    function getEventsPropertiesByOrganizer(address organizerAddress) public view returns(eventProperties[] memory) {
+        return organizerToEventProperties[organizerAddress];
     }
 
     function getEventsByOrganizer(address organizerAddress) public view returns(Event[] memory) {
