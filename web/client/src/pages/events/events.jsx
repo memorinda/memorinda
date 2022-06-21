@@ -75,9 +75,13 @@ function Events() {
       console.log(event._eventAddress);
       const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
       console.log(eventContract);     
-      const allTickets = await eventContract.methods.getAllTickets().call();
-      console.log(allTickets);
-      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account, value: allTickets[0]._ticketCost});
+      const availableTicket = await eventContract.methods.getAvailableTicket().call();
+      if(availableTicket._isActive == false)
+      {
+
+      }
+  
+      const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
       console.log(ticketResponse);
 
 

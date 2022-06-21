@@ -190,7 +190,23 @@ contract Event is ERC721URIStorage {
 
     function getAvailableTicket() public view returns(Ticket memory){
         uint foundTicketIndex = getTicketIndexBySale();
-        return idToTicket[foundTicketIndex];
+        if(idToTicket[foundTicketIndex]._ticketID > 0)
+        {
+            return idToTicket[foundTicketIndex];
+        }
+        else {
+            Ticket memory newTicket = Ticket({
+            _ticketID: 0,
+            _eventID: 0,
+            _organizer: 0x0000000000000000000000000000000000000000,//owner is manager of the vent at ticket creation
+            _owner: 0x0000000000000000000000000000000000000000,
+            _ticketCost: 0,
+            _onSale: false,
+            _isActive: false
+            });
+            return newTicket;
+        }
+        
     }
 
     function buyTicketFromID(uint ticketID) public payable returns(uint){
@@ -215,14 +231,9 @@ contract Event is ERC721URIStorage {
     {
         uint foundTicketIndex = getTicketIndexBySale();
 
-<<<<<<< Updated upstream
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
         require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
         
-=======
-        //require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        //require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
->>>>>>> Stashed changes
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
         address oldOwner = idToTicket[foundTicketIndex]._owner;
