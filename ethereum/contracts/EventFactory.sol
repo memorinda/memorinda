@@ -215,9 +215,14 @@ contract Event is ERC721URIStorage {
     {
         uint foundTicketIndex = getTicketIndexBySale();
 
+<<<<<<< Updated upstream
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
         require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
         
+=======
+        //require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        //require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+>>>>>>> Stashed changes
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
         address oldOwner = idToTicket[foundTicketIndex]._owner;

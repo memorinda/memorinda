@@ -28,14 +28,14 @@ function UserTickets() {
   const fetchTickets = async () => {
     console.log(account);
 
-    const eventIDs = await eventFactory.methods.getEventsByOrganizer(account).call();
     var get_events = await eventFactory.methods.getDeployedEvents().call();
     setAllEvents(get_events);
-
     var allTickets = [];
-    for (let i = 0; i < eventIDs.length; i++) {
+    for (let i = 0; i < get_events.length; i++) {
+        
         const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
         const userEventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        console.log(userEventTickets);
         if (userEventTickets) {
             allTickets = allTickets.concat(userEventTickets);
         }
@@ -68,10 +68,10 @@ function UserTickets() {
             type='button'
             className="btn btn-block btn-success"
             onClick={() => {
-              navigate("/add-event");
+              navigate("/events");
             }}
           >
-               Add Event
+              Events
           </button>
         </div>
         

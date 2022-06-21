@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { uploadPhotosToContract } from '../../utils/photo-upload-utils';
 import './upload-photo.scss';
 
 function UploadPhoto() {
@@ -17,6 +16,11 @@ function UploadPhoto() {
     hiddenFileUploadRef.current.click();
   }
 
+  function uploadPhotosToContract {
+
+
+  }
+  
   function handleSubmit() {
     if(photos.length > 0){
       uploadPhotosToContract(photos)
