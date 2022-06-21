@@ -20,7 +20,6 @@ contract EventFactory {
         int _latitude;
         int _eventTimestamp;
         int _eventCapacity;
-        address _organizerAddress;
     }
 
     mapping(uint256 => eventProperties) private idToEvent;
@@ -42,8 +41,7 @@ contract EventFactory {
             _longtitude: longtitude,
             _latitude: latitude,
             _eventTimestamp: eventTimestamp,
-            _eventCapacity: eventCapacity,
-            _organizerAddress: msg.sender
+            _eventCapacity: eventCapacity
         });
 
         idToEvent[currEventID] = eventProp;
@@ -80,29 +78,6 @@ contract EventFactory {
         return idToEvent[eventID];
     }
 
-    // function deleteAllEvents() private {
-    //     uint eventsLength = deployedEventsLength();
-    //     for (uint i = 0; i < eventsLength; i++) {
-    //         delete idToEvent[i];
-    //     }
-    //     eventProperties[] memory deployedEvents = getDeployedEvents();
-
-    //     for (uint i = 0; i < deployedEvents.length; i++) {
-    //         delete organizerToEvent[deployedEvents[i]._organizerAddress];
-    //         delete organizerToEventProperties[deployedEvents[i]._organizerAddress];
-    //     }
-    // }
-
-    //  function deleteMyEvents() private {
-    //     uint eventsLength = deployedEventsLength();
-    //     for (uint i = 0; i < eventsLength; i++) {
-    //         delete idToEvent[i];
-    //     }
-    //     address myAddress = address(0x3049a7bf655c9300edf3fc570ae896d8468732fc);
-    //     delete organizerToEvent[myAddress];
-    //     delete organizerToEventProperties[myAddress];
-        
-    // }
 }
 
 contract Event is ERC721URIStorage {
@@ -128,6 +103,7 @@ contract Event is ERC721URIStorage {
         address _owner;
         uint _ticketCost;
         bool _onSale;
+        bool _isActive;
     }
 
     //name description capacity eventdate location price
@@ -162,19 +138,22 @@ contract Event is ERC721URIStorage {
             _organizer: _organizerAddress,//owner is manager of the vent at ticket creation
             _owner: _organizerAddress,
             _ticketCost: ticketCost,
-            _onSale: true
+            _onSale: true,
+            _isActive: true
         });
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
         idToTicket[newTokenId] = newTicket;
         userToTicketStruct[newTicket._owner]._tickets.push(newTicket);
     }
-
+ 
     function deleteTicketFromOwner (address ownerAddress, uint ticketID) private
     {
         for(uint index=0;index<userToTicketStruct[ownerAddress]._tickets.length;index++){
             if(userToTicketStruct[ownerAddress]._tickets[index]._ticketID == ticketID){
-                delete userToTicketStruct[ownerAddress]._tickets[index];
+                userToTicketStruct[ownerAddress]._tickets[index]._isActive = false;
+                userToTicketStruct[ownerAddress]._tickets[index]._onSale = false;
+
                 break;
             }
         }
@@ -182,17 +161,19 @@ contract Event is ERC721URIStorage {
 
     function buy_ticket(uint256 ticketID) public payable {
 
-        Ticket storage _currTicket = idToTicket[ticketID];
-        require(_currTicket._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        require(msg.value == _currTicket._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        //Ticket storage _currTicket = idToTicket[ticketID];
+        require(idToTicket[ticketID]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(idToTicket[ticketID]._isActive == true, "Error: Ticket is not active.");//check if buyer can buy the ticket
+        require(msg.value == idToTicket[ticketID]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-        payable(_currTicket._owner).transfer(msg.value); //transfer money to current owner
-        address oldOwner = _currTicket._owner;
-        _currTicket._owner = msg.sender; //change owner to buyer
-        _currTicket._onSale = false;
+        payable(idToTicket[ticketID]._owner).transfer(msg.value); //transfer money to current owner
+        address oldOwner = idToTicket[ticketID]._owner;
+        idToTicket[ticketID]._onSale = false;
 
+        idToTicket[ticketID]._owner = msg.sender; //change owner to buyer
+
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[ticketID]);
         deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
-        userToTicketStruct[msg.sender]._tickets.push(_currTicket);
 
         _ticketsSold.increment();
     }
@@ -215,13 +196,13 @@ contract Event is ERC721URIStorage {
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
-        address oldOwner = idToTicket[foundTicketIndex]._owner;
+        //address oldOwner = idToTicket[foundTicketIndex]._owner;
 
         idToTicket[foundTicketIndex]._owner = msg.sender;//change owner to buyer
         idToTicket[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
 
-        deleteTicketFromOwner(oldOwner, foundTicketIndex);//change owners in map
+        //deleteTicketFromOwner(oldOwner, foundTicketIndex);//change owners in map
         userToTicketStruct[msg.sender]._tickets.push(idToTicket[foundTicketIndex]);
 
         return foundTicketIndex;
@@ -239,6 +220,7 @@ contract Event is ERC721URIStorage {
         } else {
             _ticketsSold.increment();
         }
+    }
 
     function getAllTickets() public view returns(Ticket[] memory) {
 
@@ -248,7 +230,7 @@ contract Event is ERC721URIStorage {
         
 
         for (uint256 i=0; i< totalNumTickets; i++) {
-            if (idToTicket[i+1]._onSale == true) {
+            if (idToTicket[i+1]._onSale == true && idToTicket[i+1]._isActive == true) {
                 postTickets[currInd] = idToTicket[i+1];
                 currInd = currInd + 1;
             }
