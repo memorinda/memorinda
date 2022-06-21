@@ -168,20 +168,19 @@ contract Event is ERC721URIStorage {
 
         payable(idToTicket[ticketID]._owner).transfer(msg.value); //transfer money to current owner
         address oldOwner = idToTicket[ticketID]._owner;
-        //idToTicket[ticketID]._onSale = false;
-
+        idToTicket[ticketID]._onSale = false;
         idToTicket[ticketID]._owner = msg.sender; //change owner to buyer
 
         userToTicketStruct[msg.sender]._tickets.push(idToTicket[ticketID]);
         deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
-
+        
         _ticketsSold.increment();
     }
 
     function getTicketIndexBySale() public view returns(uint){
         uint totalTickets = _ticketIds.current();
         for (uint i = 0; i < totalTickets; i++){
-            if(idToTicket[i+1]._onSale == true){
+            if(idToTicket[i+1]._onSale == true && idToTicket[i+1]._isActive == true){
                 return i+1;
             }
         }
@@ -192,14 +191,14 @@ contract Event is ERC721URIStorage {
     {
         uint foundTicketIndex = getTicketIndexBySale();
 
-        require(idToTicket[foundTicketIndex]._onSale == true,  Strings.toString(foundTicketIndex));//check if buyer can buy the ticket
+        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
         address oldOwner = idToTicket[foundTicketIndex]._owner;
 
         idToTicket[foundTicketIndex]._owner = msg.sender;//change owner to buyer
-        //idToTicket[foundTicketIndex]._onSale = false;
+        idToTicket[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
 
         deleteTicketFromOwner(oldOwner, foundTicketIndex);//change owners in map
@@ -225,15 +224,17 @@ contract Event is ERC721URIStorage {
     function getAllTickets() public view returns(Ticket[] memory) {
 
         uint256 totalNumTickets = _ticketIds.current();
-        Ticket[] memory postTickets = new Ticket[](totalNumTickets);
+        Ticket[] memory postTickets = new Ticket[](totalNumTickets - _ticketsSold.current());
         uint256 currInd = 0;
         
 
         for (uint256 i=0; i< totalNumTickets; i++) {
             if (idToTicket[i+1]._onSale == true && idToTicket[i+1]._isActive == true) {
+                //postTickets.push(idToTicket[i+1]);
                 postTickets[currInd] = idToTicket[i+1];
                 currInd = currInd + 1;
             }
+            
         }
 
         return postTickets;
