@@ -91,7 +91,7 @@ function UserTickets() {
       </div>
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h3 >Upcoming Events</h3>
+        <h3 >My Tickets</h3>
         </div>
       </div>
 
@@ -122,6 +122,16 @@ function UserTickets() {
                 </div>
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Ticket Price: {ticket._ticketCost}</h6>
+                </div>
+
+                <div className="col-sm-3 mb-3 align-self-center">
+                    <button
+                        type='button'
+                        className="upload-btn btn btn-block btn-success"
+                        onClick={() => navigate("/upload-photo")}
+                    >
+                    Upload Memorinda
+                    </button>
                 </div>
                  
               </div>

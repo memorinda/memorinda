@@ -141,16 +141,30 @@ function Events() {
                ORGANIZER
           </button>
         </div>
+
       </div> 
+
       : 
       <div className="event-navbar row justify-content-end align-items-center">
+
+        <div className="col-2">
+          <button
+            type='button'
+            className="btn btn-block btn-secondary"
+            onClick={() => {
+              navigate("/user-tickets")
+            }}
+          >
+               My Tickets
+          </button>
+        </div>
+
         <div className="col-2">
           <button
             type='button'
             className=" btn btn-block btn-primary"
             onClick={(e) => {
               e.preventDefault();
-              console.log("ashdfoasfhh")
               dispatch(userLogout())
               navigate("/events")
             }}
