@@ -91,7 +91,7 @@ contract Event is ERC721URIStorage {
 
     mapping(uint256 => Ticket) private idToTicket;
     mapping(address => UserTickets) private userToTicketStruct;
-
+    
     struct UserTickets{
         Ticket[] _tickets;
     }
@@ -141,6 +141,7 @@ contract Event is ERC721URIStorage {
             _onSale: true,
             _isActive: true
         });
+        tokenURI = Strings.toString(newTicket._ticketID);
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
         idToTicket[newTokenId] = newTicket;
@@ -187,12 +188,36 @@ contract Event is ERC721URIStorage {
         revert("All tickets are sold");
     }
 
+    function getAvailableTicket() public view returns(Ticket memory){
+        uint foundTicketIndex = getTicketIndexBySale();
+        return idToTicket[foundTicketIndex];
+    }
+
+    function buyTicketFromID(uint ticketID) public payable returns(uint){
+
+        require(msg.value == idToTicket[ticketID]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(idToTicket[ticketID]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        
+        payable(idToTicket[ticketID]._owner).transfer(msg.value);//transfer money to current owner
+        address oldOwner = idToTicket[ticketID]._owner;
+
+        idToTicket[ticketID]._owner = msg.sender;//change owner to buyer
+        idToTicket[ticketID]._onSale = false;
+        _ticketsSold.increment();
+
+        deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[ticketID]);
+
+        return ticketID;
+    }
+
     function buy_ticketFromEventID() public payable returns(uint)
     {
         uint foundTicketIndex = getTicketIndexBySale();
 
-        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
         address oldOwner = idToTicket[foundTicketIndex]._owner;
