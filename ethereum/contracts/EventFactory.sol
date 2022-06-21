@@ -229,7 +229,7 @@ contract Event is ERC721URIStorage {
 
     function setTicketSale(bool saleFlag, uint256 ticketID) public {
 
-        require(idToTicket[ticketID]._onSale == saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
+        require(idToTicket[ticketID]._onSale != saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
         require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
 
         idToTicket[ticketID]._onSale = saleFlag;
@@ -239,7 +239,6 @@ contract Event is ERC721URIStorage {
         } else {
             _ticketsSold.increment();
         }
-    }
 
     function getAllTickets() public view returns(Ticket[] memory) {
 
