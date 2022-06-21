@@ -72,12 +72,12 @@ function Events() {
     if(!currentUser){
       navigate("/login")
     }else {
-
+      console.log(event._eventAddress);
       const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);        
-
-      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
       const allTickets = await eventContract.methods.getAllTickets().call();
       console.log(allTickets);
+      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
+      console.log(ticketResponse);
 
 
       console.log(event);
@@ -141,16 +141,30 @@ function Events() {
                ORGANIZER
           </button>
         </div>
+
       </div> 
+
       : 
       <div className="event-navbar row justify-content-end align-items-center">
+
+        <div className="col-2">
+          <button
+            type='button'
+            className="btn btn-block btn-secondary"
+            onClick={() => {
+              navigate("/user-tickets")
+            }}
+          >
+               My Tickets
+          </button>
+        </div>
+
         <div className="col-2">
           <button
             type='button'
             className=" btn btn-block btn-primary"
             onClick={(e) => {
               e.preventDefault();
-              console.log("ashdfoasfhh")
               dispatch(userLogout())
               navigate("/events")
             }}
