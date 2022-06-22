@@ -16,9 +16,8 @@ function UploadPhoto() {
     hiddenFileUploadRef.current.click();
   }
 
-  function uploadPhotosToContract {
-
-
+  function uploadPhotosToContract (photos){
+    console.log(photos);
   }
   
   function handleSubmit() {
