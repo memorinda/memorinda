@@ -13,6 +13,10 @@ import { useMetamask } from '../../providers/MetaMaskProvider';
 import ABI from '../../abis/Event.json';
 import { userLogout } from '../../store/userReducer';
 
+import { create as ipfsHttpClient } from 'ipfs-http-client'
+
+// const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
+
 const createTicketSchema = z
   .object({
     ticketPrice: z.number().positive(),
@@ -69,6 +73,20 @@ function CreateTicket() {
     //   console.log(res);
     // }).catch(err => console.log(err))
     console.log(eventID);
+
+    // try {
+    //   const added = await client.add(
+    //     file,
+    //     {
+    //       progress: (prog) => console.log(`received: ${prog}`)
+    //     }
+    //   )
+    //   const url = `https://ipfs.infura.io/ipfs/${added.path}`
+
+    // } catch (error) {
+    //   console.log('Error uploading file: ', error)
+    // } 
+
     const eventProperties = await eventFactory.methods.getEventsByID(parseInt(eventID)).call();
     console.log(eventProperties);
     const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAddress);        

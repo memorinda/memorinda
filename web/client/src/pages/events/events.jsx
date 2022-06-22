@@ -20,6 +20,8 @@ function Events() {
   const [, dispatch] = useStore();
 
   const [allEvents, setAllEvents] = useState([])
+  const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
@@ -72,21 +74,24 @@ function Events() {
     if(!currentUser){
       navigate("/login")
     }else {
-      console.log(event._eventAddress);
-      const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
-      console.log(eventContract);     
-      const availableTicket = await eventContract.methods.getAvailableTicket().call();
-      if(availableTicket._isActive == false)
-      {
+      try {
+        const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
+        console.log(eventContract);     
+        const availableTicket = await eventContract.methods.getAvailableTicket().call();
 
+        
+        if(availableTicket._isActive === false){
+          setErrorMessage("All tickets are sold.");
+        }
+        
+        
+        const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
+        console.log(ticketResponse);
       }
-  
-      const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
-      console.log(ticketResponse);
 
-
-      console.log(event);
-
+    catch(err) {
+      setErrorMessage("All tickets are sold.");
+    }
       // axios
       // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
       // .then((res) => {
@@ -102,7 +107,6 @@ function Events() {
 
 
   useEffect(() => {
-    console.log(currentUser)
     fetchEvents();
   }, [])
 
@@ -212,7 +216,7 @@ function Events() {
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Capacity: {event._eventCapacity}</h6>
                 </div>
-                 
+                <p className="errorMessage">{errorMessage}</p>
               </div>
               <div className="row mt-4 justify-content-center">
               <button
