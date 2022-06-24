@@ -262,6 +262,26 @@ contract Event is ERC721URIStorage {
         }
     }
 
+    function setTicketSaleOpp(uint256 ticketID) public {
+
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+
+        if(idToTicket[ticketID]._onSale == true)
+        {
+            idToTicket[ticketID]._onSale = false;
+        }
+        else 
+        {
+            idToTicket[ticketID]._onSale = true;
+        }
+
+        if (idToTicket[ticketID]._onSale) {
+            _ticketsSold.decrement();
+        } else {
+            _ticketsSold.increment();
+        }
+    }
+
     function getAllTickets() public view returns(Ticket[] memory) {
 
         uint256 totalNumTickets = _ticketIds.current();
@@ -284,6 +304,10 @@ contract Event is ERC721URIStorage {
     function getAllTicketsByUserAddress(address userAddress) public view returns(Ticket[] memory) {
 
         return  userToTicketStruct[userAddress]._tickets;
+    }
+
+    function getTicketOwnerByID(uint tID) public view returns(address){
+        return idToTicket[tID]._owner;
     }
 
     /*
