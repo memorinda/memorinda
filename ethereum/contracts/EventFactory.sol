@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract EventFactory {
 
@@ -14,7 +15,7 @@ contract EventFactory {
         uint256 _eventID;
         string _eventName;
         string _eventDescription;
-        address _eventAdress;
+        address _eventAddress;
         int _longtitude;
         int _latitude;
         int _eventTimestamp;
@@ -25,22 +26,28 @@ contract EventFactory {
 
     mapping(address => Event[]) private organizerToEvent;
 
+    mapping(address => eventProperties[]) private organizerToEventProperties;
+
     function createEvent( string memory eventName, string memory eventDescription, int longtitude, int latitude, int eventTimestamp, int eventCapacity) public {
         _eventID.increment();
         uint256 currEventID = _eventID.current();
         Event newEvent = new Event(currEventID, msg.sender);
-        idToEvent[currEventID] = eventProperties({
-            _eventID: currEventID,
+
+        eventProperties memory eventProp = eventProperties({
+             _eventID: currEventID,
             _eventName: eventName,
             _eventDescription: eventDescription,
-            _eventAdress: address(newEvent),
+            _eventAddress: address(newEvent),
             _longtitude: longtitude,
             _latitude: latitude,
             _eventTimestamp: eventTimestamp,
             _eventCapacity: eventCapacity
         });
 
+        idToEvent[currEventID] = eventProp;
+
         organizerToEvent[msg.sender].push(newEvent);
+        organizerToEventProperties[msg.sender].push(eventProp);
 
     }
 
@@ -57,6 +64,10 @@ contract EventFactory {
             events[i] = idToEvent[i+1];
         }
         return events;
+    }
+
+    function getEventsPropertiesByOrganizer(address organizerAddress) public view returns(eventProperties[] memory) {
+        return organizerToEventProperties[organizerAddress];
     }
 
     function getEventsByOrganizer(address organizerAddress) public view returns(Event[] memory) {
@@ -79,6 +90,11 @@ contract Event is ERC721URIStorage {
     Counters.Counter private _ticketsSold;
 
     mapping(uint256 => Ticket) private idToTicket;
+    mapping(address => UserTickets) private userToTicketStruct;
+    
+    struct UserTickets{
+        Ticket[] _tickets;
+    }
 
     struct Ticket {
         uint _ticketID;
@@ -87,6 +103,7 @@ contract Event is ERC721URIStorage {
         address _owner;
         uint _ticketCost;
         bool _onSale;
+        bool _isActive;
     }
 
     //name description capacity eventdate location price
@@ -105,9 +122,9 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(string[] memory tokenURI, uint ticketCost, uint ticketAmount) public restricted{
+    function createTicketsByAmount(uint ticketCost, uint ticketAmount) public restricted{
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket(tokenURI[i], ticketCost);
+            createTicket("a", ticketCost);
         }
     }
 
@@ -121,53 +138,119 @@ contract Event is ERC721URIStorage {
             _organizer: _organizerAddress,//owner is manager of the vent at ticket creation
             _owner: _organizerAddress,
             _ticketCost: ticketCost,
-            _onSale: true
+            _onSale: true,
+            _isActive: true
         });
+        tokenURI = Strings.toString(newTicket._ticketID);
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
         idToTicket[newTokenId] = newTicket;
+        userToTicketStruct[newTicket._owner]._tickets.push(newTicket);
+    }
+ 
+    function deleteTicketFromOwner (address ownerAddress, uint ticketID) private
+    {
+        for(uint index=0;index<userToTicketStruct[ownerAddress]._tickets.length;index++){
+            if(userToTicketStruct[ownerAddress]._tickets[index]._ticketID == ticketID){
+                userToTicketStruct[ownerAddress]._tickets[index]._isActive = false;
+                userToTicketStruct[ownerAddress]._tickets[index]._onSale = false;
+
+                break;
+            }
+        }
     }
 
     function buy_ticket(uint256 ticketID) public payable {
 
-        Ticket storage _currTicket = idToTicket[ticketID];
-        require(_currTicket._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
-        require(msg.value == _currTicket._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        //Ticket storage _currTicket = idToTicket[ticketID];
+        require(idToTicket[ticketID]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        require(idToTicket[ticketID]._isActive == true, "Error: Ticket is not active.");//check if buyer can buy the ticket
+        require(msg.value == idToTicket[ticketID]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
 
-        payable(_currTicket._owner).transfer(msg.value); //transfer money to current owner
-        _currTicket._owner = msg.sender; //change owner to buyer
-        _currTicket._onSale = false;
+        payable(idToTicket[ticketID]._owner).transfer(msg.value); //transfer money to current owner
+        address oldOwner = idToTicket[ticketID]._owner;
+        idToTicket[ticketID]._onSale = false;
+        idToTicket[ticketID]._owner = msg.sender; //change owner to buyer
+
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[ticketID]);
+        deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
+        
         _ticketsSold.increment();
     }
 
     function getTicketIndexBySale() public view returns(uint){
         uint totalTickets = _ticketIds.current();
         for (uint i = 0; i < totalTickets; i++){
-            if(idToTicket[i+1]._onSale == true){
-                return i;
+            if(idToTicket[i+1]._onSale == true && idToTicket[i+1]._isActive == true){
+                return i+1;
             }
         }
         revert("All tickets are sold");
+    }
+
+    function getAvailableTicket() public view returns(Ticket memory){
+        uint foundTicketIndex = getTicketIndexBySale();
+        if(idToTicket[foundTicketIndex]._ticketID > 0)
+        {
+            return idToTicket[foundTicketIndex];
+        }
+        else {
+            Ticket memory newTicket = Ticket({
+            _ticketID: 0,
+            _eventID: 0,
+            _organizer: 0x0000000000000000000000000000000000000000,//owner is manager of the vent at ticket creation
+            _owner: 0x0000000000000000000000000000000000000000,
+            _ticketCost: 0,
+            _onSale: false,
+            _isActive: false
+            });
+            return newTicket;
+        }
+        
+    }
+
+    function buyTicketFromID(uint ticketID) public payable returns(uint){
+
+        require(msg.value == idToTicket[ticketID]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(idToTicket[ticketID]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        
+        payable(idToTicket[ticketID]._owner).transfer(msg.value);//transfer money to current owner
+        address oldOwner = idToTicket[ticketID]._owner;
+
+        idToTicket[ticketID]._owner = msg.sender;//change owner to buyer
+        idToTicket[ticketID]._onSale = false;
+        _ticketsSold.increment();
+
+        deleteTicketFromOwner(oldOwner, ticketID);//change owners in map
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[ticketID]);
+
+        return ticketID;
     }
 
     function buy_ticketFromEventID() public payable returns(uint)
     {
         uint foundTicketIndex = getTicketIndexBySale();
 
-        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
         require(msg.value == idToTicket[foundTicketIndex]._ticketCost, "Error: Ticket payment is not equal to ticket cost.");
+        require(idToTicket[foundTicketIndex]._onSale == true, "Error: Ticket is not on sale.");//check if buyer can buy the ticket
+        
 
         payable(idToTicket[foundTicketIndex]._owner).transfer(msg.value);//transfer money to current owner
+        address oldOwner = idToTicket[foundTicketIndex]._owner;
+
         idToTicket[foundTicketIndex]._owner = msg.sender;//change owner to buyer
         idToTicket[foundTicketIndex]._onSale = false;
         _ticketsSold.increment();
+
+        deleteTicketFromOwner(oldOwner, foundTicketIndex);//change owners in map
+        userToTicketStruct[msg.sender]._tickets.push(idToTicket[foundTicketIndex]);
 
         return foundTicketIndex;
     }
 
     function setTicketSale(bool saleFlag, uint256 ticketID) public {
 
-        require(idToTicket[ticketID]._onSale == saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
+        require(idToTicket[ticketID]._onSale != saleFlag, "Error: You cannot change ticket state to the same state");//restriced checks it
         require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
 
         idToTicket[ticketID]._onSale = saleFlag;
@@ -181,15 +264,26 @@ contract Event is ERC721URIStorage {
 
     function getAllTickets() public view returns(Ticket[] memory) {
 
-        uint256 totalNumTickets = _ticketsSold.current();
-        Ticket[] memory postTickets = new Ticket[](totalNumTickets);
+        uint256 totalNumTickets = _ticketIds.current();
+        Ticket[] memory postTickets = new Ticket[](totalNumTickets - _ticketsSold.current());
         uint256 currInd = 0;
+        
+
         for (uint256 i=0; i< totalNumTickets; i++) {
-            if (idToTicket[i+1]._onSale == true) {
+            if (idToTicket[i+1]._onSale == true && idToTicket[i+1]._isActive == true) {
+                //postTickets.push(idToTicket[i+1]);
                 postTickets[currInd] = idToTicket[i+1];
+                currInd = currInd + 1;
             }
+            
         }
+
         return postTickets;
+    }
+
+    function getAllTicketsByUserAddress(address userAddress) public view returns(Ticket[] memory) {
+
+        return  userToTicketStruct[userAddress]._tickets;
     }
 
     /*

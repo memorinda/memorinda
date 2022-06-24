@@ -117,6 +117,19 @@ function Login() {
                     </span>
                   </div>
                 </div>
+
+                <div className="mt-1 row text-center justify-content-center">
+                  <div className="col-12">
+                    <span
+                      className="link-line-gap d-flex justify-content-center"
+                    > An organizer?
+                   
+                      <Link to="/organizer-login">
+                        <p> Sign in as Organizer </p>
+                      </Link>
+                    </span>
+                  </div>
+                </div>
               </form>
             </div>
           </div>

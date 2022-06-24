@@ -1,23 +1,27 @@
-import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GrLocation } from "react-icons/gr";
 // import { Container, Nav, NavDropdown } from "react-bootstrap";
 // import Navbar from "react-bootstrap/Navbar";
 // import { userLogout } from "../../store/userReducer";
 import { useNavigate } from "react-router-dom";
-import { useStore } from '../../store/store';
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { useStore } from '../../store/store';
 
 import ABI from '../../abis/Event.json';
+import { userLogout } from '../../store/userReducer';
 import "./events.scss";
 
 function Events() {
   const [state] = useStore();
   const { user: currentUser } = state;
 
+  const [, dispatch] = useStore();
+
   const [allEvents, setAllEvents] = useState([])
+  const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
@@ -41,7 +45,7 @@ function Events() {
 
     const resp = await eventFactory.methods.getDeployedEvents().call();
     setAllEvents(resp);
-    
+
 
     // axios
     // .get(`${process.env.REACT_APP_URL}/events`)
@@ -70,16 +74,24 @@ function Events() {
     if(!currentUser){
       navigate("/login")
     }else {
+      try {
+        const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
+        console.log(eventContract);     
+        const availableTicket = await eventContract.methods.getAvailableTicket().call();
 
-      const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAdress);        
+        
+        if(availableTicket._isActive === false){
+          setErrorMessage("All tickets are sold.");
+        }
+        
+        
+        const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
+        console.log(ticketResponse);
+      }
 
-      const ticketResponse = await eventContract.methods.buy_ticketFromEventID().send({from: account});
-      const allTickets = await eventContract.methods.getAllTickets().call();
-      console.log(allTickets);
-
-
-      console.log(event);
-
+    catch(err) {
+      setErrorMessage("All tickets are sold.");
+    }
       // axios
       // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
       // .then((res) => {
@@ -92,12 +104,15 @@ function Events() {
 
     }
   }
+
+
   useEffect(() => {
     fetchEvents();
   }, [])
 
   return (
     <div className="events">
+    { !currentUser ? 
      <div className="event-navbar row justify-content-end align-items-center">
         <div className="col-1">
           <button
@@ -128,6 +143,7 @@ function Events() {
             type='button'
             className="btn btn-block btn-secondary"
             onClick={() => {
+              dispatch(userLogout())
               navigate("/organizer-login")
             }}
           >
@@ -135,7 +151,39 @@ function Events() {
           </button>
         </div>
 
+      </div> 
+
+      : 
+      <div className="event-navbar row justify-content-end align-items-center">
+
+        <div className="col-2">
+          <button
+            type='button'
+            className="btn btn-block btn-secondary"
+            onClick={() => {
+              navigate("/user-tickets")
+            }}
+          >
+               My Tickets
+          </button>
+        </div>
+
+        <div className="col-2">
+          <button
+            type='button'
+            className=" btn btn-block btn-primary"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch(userLogout())
+              navigate("/events")
+            }}
+          >
+               LOGOUT
+          </button>
+        </div>
       </div>
+    }
+
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
         <h3 >Upcoming Events</h3>
@@ -160,7 +208,7 @@ function Events() {
               </div>
               <div className="row align-self-center">
                 <div className="col-5 d-flex justify-content-start align-items-center">
-                   <h6><span><FaRegCalendarTimes /></span>  {Date(event._eventTimestamp).slice(0,25)} </h6>
+                   <h6><span><FaRegCalendarTimes /></span>  {(new Date(parseInt(event._eventTimestamp)).toString()).slice(0, 21)} </h6>
                 </div>
                 <div className="col-5 d-flex justify-content-start align-items-center">
                   <h6> <span> <GrLocation /></span> {event._longtitude} , {event._latitude}</h6>
@@ -168,7 +216,7 @@ function Events() {
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Capacity: {event._eventCapacity}</h6>
                 </div>
-                 
+                <p className="errorMessage">{errorMessage}</p>
               </div>
               <div className="row mt-4 justify-content-center">
               <button
