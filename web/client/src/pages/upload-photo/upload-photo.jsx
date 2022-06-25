@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
@@ -6,6 +7,7 @@ import { create } from "ipfs-http-client";
 
 import ABI from '../../abis/Event.json';
 import './upload-photo.scss';
+import { Navigate } from 'react-router';
 
 function UploadPhoto() {
 
@@ -17,6 +19,7 @@ function UploadPhoto() {
   const [photURLs, setPhotoURLs] = useState([])
   const [photosBuffer, setPhotosBuffer] = useState([]);
   const [urlArr, setUrlArr] = useState([]);
+  const navigate = useNavigate();
 
   const hiddenFileUploadRef = useRef(null)
 
@@ -57,7 +60,16 @@ function UploadPhoto() {
       }
     }
     const eventObj = await eventFactory.methods.getEventsByID(eventID).call();
-    const eventContract = await new web3js.eth.Contract(ABI.abi, eventObj._eventAddress);        
+    const eventContract = await new web3js.eth.Contract(ABI.abi, eventObj._eventAddress);
+  
+    console.log(await eventContract.methods.getAllTicketsByUserAddress(account).call());
+    try {      
+      await eventContract.methods.uploadOwnerImage(ticketID, ipfsLinks).send({from: account});
+      navigate("/user-tickets");
+    }
+    catch(err) {
+      console.log(err);
+    }
 
   }
 
