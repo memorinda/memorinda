@@ -308,8 +308,23 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTicketsByUserAddress(address userAddress) public view returns(Ticket[] memory) {
+        uint256 totalNumTickets = _ticketIds.current();
+        Ticket[] memory postTickets = new Ticket[](totalNumTickets);
+        uint256 currInd = 0;
+        
 
-        return  userToTicketStruct[userAddress]._tickets;
+        for (uint256 i=0; i< totalNumTickets; i++) {
+            if (idToTicket[i+1]._owner == userAddress && idToTicket[i+1]._isActive == true) {
+                //postTickets.push(idToTicket[i+1]);
+                postTickets[currInd] = idToTicket[i+1];
+                currInd = currInd + 1;
+            }
+            
+        }
+
+        return postTickets;
+
+        //return  userToTicketStruct[userAddress]._tickets;
     }
 
     function getTicketOwnerByID(uint tID) public view returns(address){

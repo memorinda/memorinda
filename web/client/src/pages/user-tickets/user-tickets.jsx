@@ -12,6 +12,7 @@ import ABI from '../../abis/Event.json';
 
 import { userLogout } from '../../store/userReducer';
 import "./user-tickets.scss";
+import { array } from "zod";
 
 function UserTickets() {
   const [state] = useStore();
@@ -34,8 +35,11 @@ function UserTickets() {
     for (let i = 0; i < get_events.length; i++) {
         
         const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
-        const userEventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        const eventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        const userEventTickets = eventTickets.filter(item => item._isActive == true);
+        
         console.log(userEventTickets);
+
         if (userEventTickets) {
             allTickets = allTickets.concat(userEventTickets);
         }
@@ -44,6 +48,18 @@ function UserTickets() {
     console.log(allTickets);
   }
 
+  const changeTicketSale = async(ticketID, event) => {
+    if (!currentUser) {
+      navigate("/login");
+    } 
+    else {
+            const eventContract = await new web3js.eth.Contract(ABI.abi, event._eventAddress);        
+            
+            const ticketResponse = await eventContract.methods.setTicketSaleOpp(ticketID).send({from:account});
+            console.log(ticketResponse);
+            //TRY CATHCI SILDIM PATLAR MI?
+    }
+  }
   useEffect(() => {
     fetchTickets();
   }, [account, setAllEvents, setUserTickets])
@@ -123,6 +139,9 @@ function UserTickets() {
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Ticket Price: {ticket._ticketCost}</h6>
                 </div>
+                <div className="col-2 d-flex justify-content-start align-items-center">
+                <h6> Ticket Is On Sale: {ticket._onSale.toString()}</h6>
+                </div>
 
                 <div className="col-sm-3 mb-3 align-self-center">
                     <button
@@ -131,6 +150,16 @@ function UserTickets() {
                         onClick={() => navigate("/upload-photo")}
                     >
                     Upload Memorinda
+                    </button>
+                </div>
+
+                <div className="col-sm-3 mb-3 align-self-center">
+                    <button
+                        type='button'
+                        className="upload-btn btn btn-block btn-success"
+                        onClick={() => changeTicketSale(ticket._ticketID, allEvents[parseInt(ticket._eventID)-1])}
+                    >
+                    Change Ticket Sale
                     </button>
                 </div>
                  
