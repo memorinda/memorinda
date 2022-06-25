@@ -74,32 +74,27 @@ function Events() {
     if(!currentUser){
       navigate("/login")
     }else {
-      try {
-        const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
-        console.log(eventContract);     
-        const availableTicket = await eventContract.methods.getAvailableTicket().call();
+      navigate(`/event-tickets/${event._eventID}`);
+      
+    //   try {
+    //     const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
+    //     console.log(eventContract);     
+    //     const availableTicket = await eventContract.methods.getAvailableTicket().call();
 
         
-        if(availableTicket._isActive === false){
-          setErrorMessage("All tickets are sold.");
-        }
+    //     if(availableTicket._isActive === false){
+    //       setErrorMessage("All tickets are sold.");
+    //     }
         
         
-        const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
-        console.log(ticketResponse);
-      }
+    //     const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
+    //     console.log(ticketResponse);
+    //   }
 
-    catch(err) {
-      setErrorMessage("All tickets are sold.");
-    }
-      // axios
-      // .post(`${process.env.REACT_APP_URL}/events/buy-ticket`, {eventID})
-      // .then((res) => {
-      //   console.log(res.data);
-      // })
-      // .catch((err) => {
-      //   console.log(err);
-      // })
+    // catch(err) {
+    //   setErrorMessage("All tickets are sold.");
+    // }
+
 
 
     }

@@ -12,10 +12,6 @@ import { useMetamask } from '../../providers/MetaMaskProvider';
 import ABI from '../../abis/Event.json';
 import { userLogout } from '../../store/userReducer';
 
-import { create as ipfsHttpClient } from 'ipfs-http-client'
-
-// const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
-
 const createTicketSchema = z
   .object({
     ticketPrice: z.number().positive(),
@@ -104,7 +100,7 @@ function CreateTicket() {
       const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAddress);        
 
       console.log(eventContractt);
-      const ticketResponse = await eventContractt.methods.createTicketsByAmount(data.ticketPrice, data.ticketAmount).send({from: account});
+      const ticketResponse = await eventContractt.methods.createTicketsByAmount("null", data.ticketPrice, data.ticketAmount).send({from: account});
       console.log(ticketResponse);
       setPhotos([])
 

@@ -11,48 +11,77 @@ import { useStore } from '../../store/store';
 import ABI from '../../abis/Event.json';
 
 import { userLogout } from '../../store/userReducer';
-import "./user-tickets.scss";
+import "./event-tickets.scss";
 
-function UserTickets() {
+function EventTickets() {
   const [state] = useStore();
   const { user: currentUser } = state;
   const [, dispatch] = useStore();
 
-  const [userTickets, setUserTickets] = useState([]);
-  const [allEvents, setAllEvents] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [eventTickets, setEventTickets] = useState([]);
+  const [event, setEvent] = useState({});
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
 
+  const eventID = window.location.pathname.slice(15);
 
   const fetchTickets = async () => {
-    console.log(account);
-
-    var get_events = await eventFactory.methods.getDeployedEvents().call();
-    setAllEvents(get_events);
-    var allTickets = [];
-    for (let i = 0; i < get_events.length; i++) {
-        
-        const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
-        const userEventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
-        console.log(userEventTickets);
-        if (userEventTickets) {
-            allTickets = allTickets.concat(userEventTickets);
+    console.log(eventID);
+    try {
+        const eventObj = await eventFactory.methods.getEventsByID(eventID).call();
+        console.log(eventObj);
+        setEvent(eventObj);
+        if (eventObj._eventAddress) {
+            var allTickets = [];
+            console.log(eventObj);
+            const eventContract = await new web3js.eth.Contract(ABI.abi, eventObj._eventAddress);        
+            const userEventTickets = await eventContract.methods.getAllTickets().call();
+            console.log(userEventTickets);
+            if (userEventTickets) {
+                allTickets = allTickets.concat(userEventTickets);
+            }
+            
+            setEventTickets(allTickets);
+            console.log(allTickets);
         }
     }
-    setUserTickets(allTickets);
-    console.log(allTickets);
+    catch(err) {
+        console.log(err);
+    }
+  }
+
+  const buyTicket = async (ticket) => {   
+    if (!currentUser) {
+        navigate("/login");
+    } 
+    else {
+        try {
+            const eventContract = await new web3js.eth.Contract(ABI.abi, event._eventAddress);        
+            
+            const ticketResponse = await eventContract.methods.buyTicketFromID(ticket._ticketID).send({from: account, value: ticket._ticketCost});
+            console.log(ticketResponse);
+        }
+
+        catch(err) {
+        setErrorMessage(err);
+        }
+    }
+    
+
   }
 
   useEffect(() => {
     fetchTickets();
-  }, [account, setAllEvents, setUserTickets])
+  }, [account, setEvent])
+
 
   return (
     <div className="events">
      <div className="event-navbar row justify-content-end align-items-center">
 
-     <div className="col-2">
+     {/* <div className="col-2">
           <button
             type='button'
             className="btn btn btn-primary"
@@ -62,7 +91,7 @@ function UserTickets() {
           >
                Verify A Ticket
           </button>
-        </div>
+        </div> */}
      <div className="col-2">
           <button
             type='button'
@@ -91,12 +120,12 @@ function UserTickets() {
       </div>
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h3 >My Tickets</h3>
+        <h3 >Event Tickets</h3>
         </div>
       </div>
 
-    {(userTickets.length >= 1 && allEvents.length >= 1) ? 
-      userTickets.map(ticket => {
+    {(eventTickets.length >= 1) ? 
+      eventTickets.map(ticket => {
         return(
           <div key={ticket._eventID+"/"+ticket._ticketID} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
@@ -105,35 +134,33 @@ function UserTickets() {
             </div>
             <div className="event-info col-9 align-items-left">
               <div className="row align-self-center">
-                <h4>{allEvents[parseInt(ticket._eventID)-1]._eventName}</h4>
+                <h4>{event._eventName}</h4>
               </div>
               <div className="row align-self-center">
-                <p>{allEvents[parseInt(ticket._eventID)-1]._eventDescription}</p>
+                <p>{event._eventDescription}</p>
               </div>
               <div className="row align-self-center">
                 <div className="col-5 d-flex justify-content-start align-items-center">
-                   <h6><span><FaRegCalendarTimes /></span>  {(new Date(parseInt(allEvents[parseInt(ticket._eventID)-1]._eventTimestamp)).toString()).slice(0, 21)} </h6>
+                   <h6><span><FaRegCalendarTimes /></span>  {(new Date(parseInt(event._eventTimestamp)).toString()).slice(0, 21)} </h6>
                 </div>
                 <div className="col-5 d-flex justify-content-start align-items-center">
-                  <h6> <span> <GrLocation /></span> {allEvents[parseInt(ticket._eventID)-1]._longtitude} , {allEvents[parseInt(ticket._eventID)-1]._latitude}</h6>
+                  <h6> <span> <GrLocation /></span> {event._longtitude} , {event._latitude}</h6>
                 </div>
                 <div className="col-2 d-flex justify-content-start align-items-center">
-                <h6> Capacity: {allEvents[parseInt(ticket._eventID)-1]._eventCapacity}</h6>
+                <h6> Capacity: {event._eventCapacity}</h6>
                 </div>
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Ticket Price: {ticket._ticketCost}</h6>
                 </div>
-
-                <div className="col-sm-3 mb-3 align-self-center">
-                    <button
-                        type='button'
-                        className="upload-btn btn btn-block btn-success"
-                        onClick={() => navigate("/upload-photo")}
-                    >
-                    Upload Memorinda
-                    </button>
-                </div>
-                 
+              </div>
+              <div className="row mt-4 justify-content-center">
+              <button
+                  type='button'
+                  className="col-6 btn btn-block btn-success"
+                  onClick={() => {buyTicket(ticket)}}
+                >
+                      BUY TICKET
+                </button>
               </div>
             </div>
             
@@ -143,7 +170,7 @@ function UserTickets() {
       }) :
       <div className=" row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h4>No tickets yet</h4>
+        <h4>No tickets left</h4>
         </div>
       </div>
       
@@ -156,4 +183,4 @@ function UserTickets() {
   );
 }
 
-export default UserTickets;
+export default EventTickets;
