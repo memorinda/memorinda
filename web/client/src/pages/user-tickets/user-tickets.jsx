@@ -160,7 +160,7 @@ function UserTickets() {
                     <button
                         type='button'
                         className="upload-btn btn btn-block btn-success"
-                        onClick={() => navigate("/upload-photo")}
+                        onClick={() => navigate(`/upload-photo/${ticket._eventID+"/"+ticket._ticketID}`)}
                     >
                     Upload Memorinda
                     </button>

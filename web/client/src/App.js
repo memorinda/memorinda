@@ -78,7 +78,7 @@ function App() {
                 element={<EventTickets />}
               />
               <Route
-                path="/upload-photo"
+                path="/upload-photo/:id"
                 element={<UploadPhoto />}
               />
               <Route
