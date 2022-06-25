@@ -105,6 +105,7 @@ contract Event is ERC721URIStorage {
         bool _onSale;
         bool _isActive;
         string _ticketURI;
+        string _ticketOwnerURI;
     }
 
     //name description capacity eventdate location price
@@ -141,7 +142,8 @@ contract Event is ERC721URIStorage {
             _ticketCost: ticketCost,
             _onSale: true,
             _isActive: true,
-            _ticketURI: tokenURI
+            _ticketURI: tokenURI,
+            _ticketOwnerURI: ""
         });
         //tokenURI = Strings.toString(newTicket._ticketID);//tokenURI
         _mint(msg.sender, newTokenId);
@@ -205,7 +207,8 @@ contract Event is ERC721URIStorage {
             _ticketCost: 0,
             _onSale: false,
             _isActive: false,
-            _ticketURI: ""
+            _ticketURI: "",
+            _ticketOwnerURI: ""
             });
             return newTicket;
         }
@@ -311,6 +314,13 @@ contract Event is ERC721URIStorage {
 
     function getTicketOwnerByID(uint tID) public view returns(address){
         return idToTicket[tID]._owner;
+    }
+
+    function uploadTicketURI(uint ticketID, string memory ticketURI) public
+    {
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+
+        idToTicket[ticketID]._ticketOwnerURI = ticketURI;
     }
 
     /*
