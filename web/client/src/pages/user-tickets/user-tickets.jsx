@@ -140,17 +140,10 @@ function UserTickets() {
                 <h6> Ticket Price: {ticket._ticketCost}</h6>
                 </div>
                 <div className="col-2 d-flex justify-content-start align-items-center">
-                <h6> Ticket Is On Sale: {ticket._onSale.toString()}</h6>
+                <h6> Ticket ID: {ticket._ticketID}</h6>
                 </div>
-
-                <div className="col-sm-3 mb-3 align-self-center">
-                    <button
-                        type='button'
-                        className="upload-btn btn btn-block btn-success"
-                        onClick={() => navigate("/upload-photo")}
-                    >
-                    Upload Memorinda
-                    </button>
+                <div className="col-2 d-flex justify-content-start align-items-center">
+                <h6> Ticket Is On Sale: {ticket._onSale.toString()}</h6>
                 </div>
 
                 <div className="col-sm-3 mb-3 align-self-center">
@@ -162,6 +155,18 @@ function UserTickets() {
                     Change Ticket Sale
                     </button>
                 </div>
+                
+                <div className="col-sm-3 mb-3 align-self-center">
+                    <button
+                        type='button'
+                        className="upload-btn btn btn-block btn-success"
+                        onClick={() => navigate("/upload-photo")}
+                    >
+                    Upload Memorinda
+                    </button>
+                </div>
+
+                
                  
               </div>
             </div>
