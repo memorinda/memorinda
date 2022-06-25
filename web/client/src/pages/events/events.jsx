@@ -211,6 +211,9 @@ function Events() {
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Capacity: {event._eventCapacity}</h6>
                 </div>
+                <div className="col-2 d-flex justify-content-start align-items-center">
+                <h6> Event ID: {event._eventID}</h6>
+                </div>
                 <p className="errorMessage">{errorMessage}</p>
               </div>
               <div className="row mt-4 justify-content-center">
