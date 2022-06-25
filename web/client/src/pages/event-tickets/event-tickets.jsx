@@ -10,6 +10,7 @@ import { useMetamask } from '../../providers/MetaMaskProvider';
 import { useStore } from '../../store/store';
 import ABI from '../../abis/Event.json';
 
+import SimpleImageSlider from "react-simple-image-slider";
 import { userLogout } from '../../store/userReducer';
 import "./event-tickets.scss";
 
@@ -129,8 +130,16 @@ function EventTickets() {
         return(
           <div key={ticket._eventID+"/"+ticket._ticketID} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
-              <div className="event-picture" >
-              </div>
+                <div>
+                    <SimpleImageSlider
+                        width={120}
+                        height={120}
+                        navSize={10}
+                        images={ticket._organizerImageLinks}
+                        showBullets={true}
+                        showNavs={true}
+                    />
+                </div>
             </div>
             <div className="event-info col-9 align-items-left">
               <div className="row align-self-center">

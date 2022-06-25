@@ -75,28 +75,6 @@ function Events() {
       navigate("/login")
     }else {
       navigate(`/event-tickets/${event._eventID}`);
-      
-    //   try {
-    //     const eventContract = await new web3js.eth.Contract(ABI.abi,event._eventAddress);   
-    //     console.log(eventContract);     
-    //     const availableTicket = await eventContract.methods.getAvailableTicket().call();
-
-        
-    //     if(availableTicket._isActive === false){
-    //       setErrorMessage("All tickets are sold.");
-    //     }
-        
-        
-    //     const ticketResponse = await eventContract.methods.buyTicketFromID(availableTicket._ticketID).send({from: account, value: availableTicket._ticketCost});
-    //     console.log(ticketResponse);
-    //   }
-
-    // catch(err) {
-    //   setErrorMessage("All tickets are sold.");
-    // }
-
-
-
     }
   }
 

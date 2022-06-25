@@ -10,6 +10,7 @@ import { useMetamask } from '../../providers/MetaMaskProvider';
 import { useStore } from '../../store/store';
 import ABI from '../../abis/Event.json';
 
+import SimpleImageSlider from "react-simple-image-slider";
 import { userLogout } from '../../store/userReducer';
 import "./user-tickets.scss";
 import { array } from "zod";
@@ -36,7 +37,7 @@ function UserTickets() {
         
         const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
         const eventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
-        const userEventTickets = eventTickets.filter(item => item._isActive == true);
+        const userEventTickets = eventTickets.filter(item => item._isActive === true);
         
         console.log(userEventTickets);
 
@@ -116,8 +117,17 @@ function UserTickets() {
         return(
           <div key={ticket._eventID+"/"+ticket._ticketID} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
-              <div className="event-picture" >
-              </div>
+              <div>
+                  <SimpleImageSlider
+                      width={120}
+                      height={120}
+                      navSize={15}
+                      navMargin={3}
+                      images={ticket._organizerImageLinks}
+                      showBullets={false}
+                      showNavs={true}
+                  />
+                </div>
             </div>
             <div className="event-info col-9 align-items-left">
               <div className="row align-self-center">
@@ -160,11 +170,27 @@ function UserTickets() {
                     <button
                         type='button'
                         className="upload-btn btn btn-block btn-success"
-                        onClick={() => navigate("/upload-photo")}
+                        onClick={() => navigate(`/upload-photo/${ticket._eventID+"/"+ticket._ticketID}`)}
                     >
                     Upload Memorinda
                     </button>
                 </div>
+                <div className=" col-3 align-self-center">
+                  {(ticket._ownerImageLinks.length > 0) ?
+              (<div>
+                  <SimpleImageSlider
+                      width={120}
+                      height={120}
+                      navSize={15}
+                      navMargin={3}                      
+                      images={ticket._ownerImageLinks}
+                      showBullets={false}
+                      showNavs={true}
+                  />
+                </div>) :
+                <div></div>
+          }
+            </div>
 
                 
                  
