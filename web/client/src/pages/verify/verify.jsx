@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router';
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 import { useStore } from "../../store/store";
 import "./verify.scss";
+import ABI from '../../abis/Event.json';
 
 
 
@@ -18,7 +19,11 @@ function Verify() {
   const [errorMessageSign, setErrorMessageSign] = useState("");
   const [errorMessageVerify, setErrorMessageVerify] = useState("");
   const [userAccount, setUserAccount] = useState("");
+  const [eventID, setEventID] = useState("");
 
+
+  const [userTickets, setUserTickets] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
 
   const {
     register,
@@ -34,6 +39,7 @@ function Verify() {
 
   const onSubmitSign = async (data) => {
 
+    fetchTickets();
     try {
       console.log("b");
 
@@ -41,6 +47,8 @@ function Verify() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const signature = await signer.signMessage(data.ticketIDSign);
+    console.log("eventID:", data.eventIDSign);
+    setEventID(data.eventIDSign);
     setUserAccount(account);
     console.log("a");
 
@@ -54,17 +62,54 @@ function Verify() {
     }
   };
 
+  const fetchTickets = async () => {
+    console.log(account);
+
+    var get_events = await eventFactory.methods.getDeployedEvents().call();
+    setAllEvents(get_events);
+    console.log("all events:", allEvents);
+
+    var allTickets = [];
+    for (let i = 0; i < get_events.length; i++) {
+        
+        const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
+        const eventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        const userEventTickets = eventTickets.filter(item => item._isActive == true);
+        
+        console.log(userEventTickets);
+
+        if (userEventTickets) {
+            allTickets = allTickets.concat(userEventTickets);
+        }
+    }
+    setUserTickets(allTickets);
+    console.log(allTickets);
+  }
+
+  const getTicketOwnerAddr = async (ticketID) => {
+
+  }
+
   const onSubmitVerify = async (data) => {
 
     try {
       await window.ethereum.send("eth_requestAccounts");
   
-    console.log("account: ", account);
+      console.log("account: ", account);
       const signerAddr = await ethers.utils.verifyMessage(data.ticketIDVerify, errorMessageSign);
       console.log("mm");
       console.log(signerAddr);
       console.log(userAccount);
-      if (signerAddr.toLowerCase() === userAccount.toLowerCase()) {
+      //const event = allEvents[eventID - 1];
+      console.log("event:", allEvents[eventID - 1]);
+      const eventContract = await new web3js.eth.Contract(ABI.abi, allEvents[eventID - 1]._eventAddress);        
+
+      const realOwnerAddr = await eventContract.methods.getTicketOwnerByID(data.ticketIDVerify).call();
+
+      console.log("realOwnerAddr", realOwnerAddr);
+      console.log("signerAddr", signerAddr);
+
+      if (signerAddr.toLowerCase() === realOwnerAddr.toLowerCase()) {
         console.log("aa");
         setErrorMessageVerify("Successfully verified ticket");
       }
@@ -79,6 +124,10 @@ function Verify() {
 
     }
   };
+
+  useEffect(() => {
+    fetchTickets();
+  }, [account, setAllEvents, setUserTickets])
 
   return (
     <div className="imge">
@@ -98,6 +147,12 @@ function Verify() {
                     {...register("ticketIDSign")}
                     className="btn-border input-style form-control"
                     placeholder="Enter Ticket Id"
+                  >
+                  </input>
+                  <input
+                    {...register("eventIDSign")}
+                    className="btn-border input-style form-control"
+                    placeholder="Enter Event Id"
                   >
                   </input>
                   <small className="align-self-start error-text">
