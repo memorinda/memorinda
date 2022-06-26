@@ -8,13 +8,10 @@ import "./create-ticket.css";
 
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
+import { create } from "ipfs-http-client";
 
 import ABI from '../../abis/Event.json';
 import { userLogout } from '../../store/userReducer';
-
-import { create as ipfsHttpClient } from 'ipfs-http-client'
-
-// const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
 
 const createTicketSchema = z
   .object({
@@ -60,9 +57,24 @@ function CreateTicket() {
   const [photURLs, setPhotoURLs] = useState([])
 
   const hiddenFileUploadRef = useRef(null)
+  const [photosBuffer, setPhotosBuffer] = useState([]);
+  const [urlArr, setUrlArr] = useState([]);
+
+
+  const client = create('https://ipfs.infura.io:5001/api/v0');
 
   function onPhotoUpload(e) {
     setPhotos([...e.target.files])
+    const data = e.target.files;
+    for (let i = 0; i < data.length; i++) {
+      const reader = new window.FileReader();
+      reader.readAsArrayBuffer(data[i]);
+      reader.onloadend = () => {
+        console.log("Buffer data: ", Buffer(reader.result));
+        setPhotosBuffer(prev => [...prev, reader.result]);
+      }
+    }
+    e.preventDefault();  
   }
   
   function handleOnClick() {
@@ -98,13 +110,24 @@ function CreateTicket() {
       // }).then(res => {
       //   console.log(res);
       // }).catch(err => console.log(err))
+      const ipfsLinks = [];
+      for (let i = 0; i < photosBuffer.length; i++) {
+        try {
+          const created = await client.add(Buffer(photosBuffer[i]));
+          const url = `https://ipfs.infura.io/ipfs/${created.path}`;
+          ipfsLinks.push(url);
+          setUrlArr(prev => [...prev, url]);      
+        } catch (error) {
+          console.log(error.message);
+        }
+      }
       console.log(eventID);
       const eventProperties = await eventFactory.methods.getEventsByID(parseInt(eventID)).call();
       console.log(eventProperties);
       const eventContractt = await new web3js.eth.Contract(ABI.abi,eventProperties._eventAddress);        
 
       console.log(eventContractt);
-      const ticketResponse = await eventContractt.methods.createTicketsByAmount(data.ticketPrice, data.ticketAmount).send({from: account});
+      const ticketResponse = await eventContractt.methods.createTicketsByAmount("null", data.ticketPrice, data.ticketAmount, ipfsLinks).send({from: account});
       console.log(ticketResponse);
       setPhotos([])
 

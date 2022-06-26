@@ -14,6 +14,9 @@ import UploadPhoto from './pages/upload-photo/upload-photo';
 import Verify from './pages/verify/verify';
 import { useStore } from "./store/store";
 import UserTickets from "./pages/user-tickets/user-tickets";
+import EventTickets from "./pages/event-tickets/event-tickets";
+
+
 
 function App() {
   const [state] = useStore();
@@ -66,12 +69,16 @@ function App() {
                 path="/events"
                 element={<Events />}
               />
-               <Route
+              <Route
                 path="/user-tickets"
                 element={<UserTickets />}
               />
               <Route
-                path="/upload-photo"
+                path="/event-tickets/:id"
+                element={<EventTickets />}
+              />
+              <Route
+                path="/upload-photo/:eventid/:ticketid"
                 element={<UploadPhoto />}
               />
               <Route

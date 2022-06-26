@@ -1,27 +1,76 @@
 import { useEffect, useRef, useState } from 'react';
-import { uploadPhotosToContract } from '../../utils/photo-upload-utils';
+import { useNavigate } from "react-router-dom";
+
+import { useContract } from '../../providers/ContractProvider';
+import { useMetamask } from '../../providers/MetaMaskProvider';
+import { create } from "ipfs-http-client";
+
+import ABI from '../../abis/Event.json';
 import './upload-photo.scss';
+import { Navigate } from 'react-router';
 
 function UploadPhoto() {
 
+
+  const {contract: eventFactory, web3js} = useContract();
+  const account = useMetamask();
+
   const [photos, setPhotos] = useState([]);
   const [photURLs, setPhotoURLs] = useState([])
+  const [photosBuffer, setPhotosBuffer] = useState([]);
+  const [urlArr, setUrlArr] = useState([]);
+  const navigate = useNavigate();
 
   const hiddenFileUploadRef = useRef(null)
 
+  const client = create('https://ipfs.infura.io:5001/api/v0');
+  let eventAndTicketID =(window.location.pathname.slice(14)).split("/");
+  //eventAndTicketID = eventAndTicketID.split("/");
+  const eventID = eventAndTicketID[0];
+  const ticketID = eventAndTicketID[1];
+
   function onPhotoUpload(e) {
     setPhotos([...e.target.files])
+    const data = e.target.files;
+    for (let i = 0; i < data.length; i++) {
+      const reader = new window.FileReader();
+      reader.readAsArrayBuffer(data[i]);
+      reader.onloadend = () => {
+        console.log("Buffer data: ", Buffer(reader.result));
+        setPhotosBuffer(prev => [...prev, reader.result]);
+      }
+    }
+    e.preventDefault();  
   }
   
   function handleOnClick() {
     hiddenFileUploadRef.current.click();
   }
 
-  function handleSubmit() {
-    if(photos.length > 0){
-      uploadPhotosToContract(photos)
-      setPhotos([])
+  async function handleSubmit() {
+    const ipfsLinks = [];
+    for (let i = 0; i < photosBuffer.length; i++) {
+      try {
+        const created = await client.add(Buffer(photosBuffer[i]));
+        const url = `https://ipfs.infura.io/ipfs/${created.path}`;
+        ipfsLinks.push(url);
+        setUrlArr(prev => [...prev, url]);      
+      } catch (error) {
+        console.log(error.message);
+      }
     }
+    const eventObj = await eventFactory.methods.getEventsByID(eventID).call();
+    const eventContract = await new web3js.eth.Contract(ABI.abi, eventObj._eventAddress);
+  
+    console.log(await eventContract.methods.getAllTicketsByUserAddress(account).call());
+    try {      
+      await eventContract.methods.uploadOwnerImage(ticketID, ipfsLinks).send({from: account});
+      navigate("/user-tickets");
+    }
+    catch(err) {
+      console.log(err);
+    }
+
   }
 
   useEffect(() => {
@@ -61,7 +110,6 @@ function UploadPhoto() {
             type='button'
             className="upload-btn btn btn-block btn-success"
             onClick={handleSubmit}
-            disabled={photURLs.length===0}
           >
           Upload
           </button>
@@ -83,10 +131,15 @@ function UploadPhoto() {
            </div>
           );
         })}
-      
       </div>
+
+      {/* <div className="display">
+        {urlArr.length !== 0
+          ? urlArr.map((el) => { return (<div><img src={el} alt="nfts" /> <p> {el} </p></div>)})
+          : <h3>Upload data</h3>}
+      </div> */}
     </div>
   )
 }
 
-export default UploadPhoto
+export default UploadPhoto;

@@ -10,8 +10,10 @@ import { useMetamask } from '../../providers/MetaMaskProvider';
 import { useStore } from '../../store/store';
 import ABI from '../../abis/Event.json';
 
+import SimpleImageSlider from "react-simple-image-slider";
 import { userLogout } from '../../store/userReducer';
 import "./user-tickets.scss";
+import { array } from "zod";
 
 function UserTickets() {
   const [state] = useStore();
@@ -34,8 +36,11 @@ function UserTickets() {
     for (let i = 0; i < get_events.length; i++) {
         
         const eventContract = await new web3js.eth.Contract(ABI.abi, get_events[i]._eventAddress);        
-        const userEventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        const eventTickets = await eventContract.methods.getAllTicketsByUserAddress(account).call();
+        const userEventTickets = eventTickets.filter(item => item._isActive === true);
+        
         console.log(userEventTickets);
+
         if (userEventTickets) {
             allTickets = allTickets.concat(userEventTickets);
         }
@@ -44,6 +49,18 @@ function UserTickets() {
     console.log(allTickets);
   }
 
+  const changeTicketSale = async(ticketID, event) => {
+    if (!currentUser) {
+      navigate("/login");
+    } 
+    else {
+            const eventContract = await new web3js.eth.Contract(ABI.abi, event._eventAddress);        
+            
+            const ticketResponse = await eventContract.methods.setTicketSaleOpp(ticketID).send({from:account});
+            console.log(ticketResponse);
+            //TRY CATHCI SILDIM PATLAR MI?
+    }
+  }
   useEffect(() => {
     fetchTickets();
   }, [account, setAllEvents, setUserTickets])
@@ -100,8 +117,17 @@ function UserTickets() {
         return(
           <div key={ticket._eventID+"/"+ticket._ticketID} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
-              <div className="event-picture" >
-              </div>
+              <div>
+                  <SimpleImageSlider
+                      width={120}
+                      height={120}
+                      navSize={15}
+                      navMargin={3}
+                      images={ticket._organizerImageLinks}
+                      showBullets={false}
+                      showNavs={true}
+                  />
+                </div>
             </div>
             <div className="event-info col-9 align-items-left">
               <div className="row align-self-center">
@@ -123,16 +149,50 @@ function UserTickets() {
                 <div className="col-2 d-flex justify-content-start align-items-center">
                 <h6> Ticket Price: {ticket._ticketCost}</h6>
                 </div>
+                <div className="col-2 d-flex justify-content-start align-items-center">
+                <h6> Ticket ID: {ticket._ticketID}</h6>
+                </div>
+                <div className="col-2 d-flex justify-content-start align-items-center">
+                <h6> Ticket Is On Sale: {ticket._onSale.toString()}</h6>
+                </div>
 
                 <div className="col-sm-3 mb-3 align-self-center">
                     <button
                         type='button'
                         className="upload-btn btn btn-block btn-success"
-                        onClick={() => navigate("/upload-photo")}
+                        onClick={() => changeTicketSale(ticket._ticketID, allEvents[parseInt(ticket._eventID)-1])}
+                    >
+                    Change Ticket Sale
+                    </button>
+                </div>
+                
+                <div className="col-sm-3 mb-3 align-self-center">
+                    <button
+                        type='button'
+                        className="upload-btn btn btn-block btn-success"
+                        onClick={() => navigate(`/upload-photo/${ticket._eventID+"/"+ticket._ticketID}`)}
                     >
                     Upload Memorinda
                     </button>
                 </div>
+                <div className=" col-3 align-self-center">
+                  {(ticket._ownerImageLinks.length > 0) ?
+              (<div>
+                  <SimpleImageSlider
+                      width={120}
+                      height={120}
+                      navSize={15}
+                      navMargin={3}                      
+                      images={ticket._ownerImageLinks}
+                      showBullets={false}
+                      showNavs={true}
+                  />
+                </div>) :
+                <div></div>
+          }
+            </div>
+
+                
                  
               </div>
             </div>
@@ -143,7 +203,7 @@ function UserTickets() {
       }) :
       <div className=" row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h4>No event yet</h4>
+        <h4>No tickets yet</h4>
         </div>
       </div>
       

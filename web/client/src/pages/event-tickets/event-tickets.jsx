@@ -8,169 +8,138 @@ import { useNavigate } from "react-router-dom";
 import { useContract } from '../../providers/ContractProvider';
 import { useMetamask } from '../../providers/MetaMaskProvider';
 import { useStore } from '../../store/store';
-
 import ABI from '../../abis/Event.json';
-import { userLogout } from '../../store/userReducer';
-import "./events.scss";
 
-function Events() {
+import SimpleImageSlider from "react-simple-image-slider";
+import { userLogout } from '../../store/userReducer';
+import "./event-tickets.scss";
+
+function EventTickets() {
   const [state] = useStore();
   const { user: currentUser } = state;
-
   const [, dispatch] = useStore();
 
-  const [allEvents, setAllEvents] = useState([])
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [eventTickets, setEventTickets] = useState([]);
+  const [event, setEvent] = useState({});
   const navigate = useNavigate();
   const {contract: eventFactory, web3js} = useContract();
   const account = useMetamask();
-  
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [state, dispatch] = useStore();
-  // const { user: currentUser } = state;
-  // // const [errorMessage, setErrorMessage] = useState();
-  // const onSubmit = useCallback((data) => {
-  //   // dispatch(userLogout());
-  //   navigate("/login");
-  // }, [dispatch, navigate]);
 
+  const eventID = window.location.pathname.slice(15);
 
-
-  // async function handleSearch() {
-  //   navigate(`/eventSearch/${searchQuery}`);
-  // }
-
-  const fetchEvents = async () => {
-
-    const resp = await eventFactory.methods.getDeployedEvents().call();
-    setAllEvents(resp);
-
-
-    // axios
-    // .get(`${process.env.REACT_APP_URL}/events`)
-    // .then((res) => {
-    //   console.log(res.data);
-    //   setAllEvents(res.data)
-     
-    // })
-    // .catch((err) => {
-    //   console.log("Error:", err);
-    //   navigate("/error")
-      
-    // });
-  }
-
-  // const getAllTickets = async () => {
-  //   if (!currentUser) {
-  //     navigate("/login");
-  //   }
-  //   else {
-
-  //   }
-  // }
-
-  const buyTicket = async (event) => {
-    if(!currentUser){
-      navigate("/login")
-    }else {
-      navigate(`/event-tickets/${event._eventID}`);
+  const fetchTickets = async () => {
+    console.log(eventID);
+    try {
+        const eventObj = await eventFactory.methods.getEventsByID(eventID).call();
+        console.log(eventObj);
+        setEvent(eventObj);
+        if (eventObj._eventAddress) {
+            var allTickets = [];
+            console.log(eventObj);
+            const eventContract = await new web3js.eth.Contract(ABI.abi, eventObj._eventAddress);        
+            const userEventTickets = await eventContract.methods.getAllTickets().call();
+            console.log(userEventTickets);
+            if (userEventTickets) {
+                allTickets = allTickets.concat(userEventTickets);
+            }
+            
+            setEventTickets(allTickets);
+            console.log(allTickets);
+        }
+    }
+    catch(err) {
+        console.log(err);
     }
   }
 
+  const buyTicket = async (ticket) => {   
+    if (!currentUser) {
+        navigate("/login");
+    } 
+    else {
+        try {
+            const eventContract = await new web3js.eth.Contract(ABI.abi, event._eventAddress);        
+            
+            const ticketResponse = await eventContract.methods.buyTicketFromID(ticket._ticketID).send({from: account, value: ticket._ticketCost});
+            console.log(ticketResponse);
+        }
+
+        catch(err) {
+        setErrorMessage(err);
+        }
+    }
+    
+
+  }
 
   useEffect(() => {
-    fetchEvents();
-  }, [])
+    fetchTickets();
+  }, [account, setEvent])
+
 
   return (
     <div className="events">
-    { !currentUser ? 
      <div className="event-navbar row justify-content-end align-items-center">
-        <div className="col-1">
+
+     {/* <div className="col-2">
+          <button
+            type='button'
+            className="btn btn btn-primary"
+            onClick={() => {
+              navigate("/verify");
+            }}
+          >
+               Verify A Ticket
+          </button>
+        </div> */}
+     <div className="col-2">
           <button
             type='button'
             className="btn btn-block btn-success"
             onClick={() => {
-              navigate("/login")
+              navigate("/events");
             }}
           >
-               LOGIN
+              Events
           </button>
         </div>
-      
-        <div className="col-2">
-          <button
-            type='button'
-            className=" btn btn-block btn-primary"
-            onClick={() => {
-              navigate("/signup")
-            }}
-          >
-               SIGN UP
-          </button>
-        </div>
-
+        
         <div className="col-2">
           <button
             type='button'
             className="btn btn-block btn-secondary"
             onClick={() => {
-              dispatch(userLogout())
-              navigate("/organizer-login")
-            }}
-          >
-               ORGANIZER
-          </button>
-        </div>
-
-      </div> 
-
-      : 
-      <div className="event-navbar row justify-content-end align-items-center">
-
-        <div className="col-2">
-          <button
-            type='button'
-            className="btn btn-block btn-secondary"
-            onClick={() => {
-              navigate("/user-tickets")
-            }}
-          >
-               My Tickets
-          </button>
-        </div>
-
-        <div className="col-2">
-          <button
-            type='button'
-            className=" btn btn-block btn-primary"
-            onClick={(e) => {
-              e.preventDefault();
-              dispatch(userLogout())
-              navigate("/events")
+              dispatch(userLogout());
+              navigate("/organizer-login");
             }}
           >
                LOGOUT
           </button>
         </div>
-      </div>
-    }
 
+      </div>
       <div className="event-header row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h3 >Upcoming Events</h3>
+        <h3 >Event Tickets</h3>
         </div>
       </div>
 
-    {allEvents.length > 0 ? 
-      allEvents.map(event => {
+    {(eventTickets.length >= 1) ? 
+      eventTickets.map(ticket => {
         return(
-          <div key={event._eventAddress} className="event-content row mt-5 justify-content-center align-items-center">
+          <div key={ticket._eventID+"/"+ticket._ticketID} className="event-content row mt-5 justify-content-center align-items-center">
             <div className=" col-3 align-self-center">
-              <div className="event-picture" >
-              {/* <img src={defaultImage} alt='Event'/>  */}
-              </div>
+                <div>
+                    <SimpleImageSlider
+                        width={120}
+                        height={120}
+                        navSize={10}
+                        images={ticket._organizerImageLinks}
+                        showBullets={true}
+                        showNavs={true}
+                    />
+                </div>
             </div>
             <div className="event-info col-9 align-items-left">
               <div className="row align-self-center">
@@ -190,15 +159,14 @@ function Events() {
                 <h6> Capacity: {event._eventCapacity}</h6>
                 </div>
                 <div className="col-2 d-flex justify-content-start align-items-center">
-                <h6> Event ID: {event._eventID}</h6>
+                <h6> Ticket Price: {ticket._ticketCost}</h6>
                 </div>
-                <p className="errorMessage">{errorMessage}</p>
               </div>
               <div className="row mt-4 justify-content-center">
               <button
                   type='button'
                   className="col-6 btn btn-block btn-success"
-                  onClick={() => {buyTicket(event)}}
+                  onClick={() => {buyTicket(ticket)}}
                 >
                       BUY TICKET
                 </button>
@@ -211,7 +179,7 @@ function Events() {
       }) :
       <div className=" row mt-5 justify-content-center align-items-center">
         <div className="  col-5 align-self-center">
-        <h4>No event yet</h4>
+        <h4>No tickets left</h4>
         </div>
       </div>
       
@@ -224,4 +192,4 @@ function Events() {
   );
 }
 
-export default Events;
+export default EventTickets;

@@ -104,6 +104,8 @@ contract Event is ERC721URIStorage {
         uint _ticketCost;
         bool _onSale;
         bool _isActive;
+        string[] _ownerImageLinks;
+        string[] _organizerImageLinks;
     }
 
     //name description capacity eventdate location price
@@ -122,14 +124,14 @@ contract Event is ERC721URIStorage {
         _;
     }
 
-    function createTicketsByAmount(uint ticketCost, uint ticketAmount) public restricted{
+    function createTicketsByAmount(string memory tokenURI, uint ticketCost, uint ticketAmount, string[] memory imageLinks) public restricted{
         for (uint i = 0; i < ticketAmount; i++) {
-            createTicket("a", ticketCost);
+            createTicket(tokenURI, ticketCost, imageLinks);
         }
     }
 
     //create a single ticket
-    function createTicket(string memory tokenURI, uint ticketCost) public {
+    function createTicket(string memory tokenURI, uint ticketCost, string[] memory imageLinks) public {
         _ticketIds.increment();
         uint256 newTokenId = _ticketIds.current();
         Ticket memory newTicket = Ticket({
@@ -139,9 +141,11 @@ contract Event is ERC721URIStorage {
             _owner: _organizerAddress,
             _ticketCost: ticketCost,
             _onSale: true,
-            _isActive: true
+            _isActive: true,
+            _ownerImageLinks: new string[](0),
+            _organizerImageLinks: imageLinks
         });
-        tokenURI = Strings.toString(newTicket._ticketID);
+        //tokenURI = Strings.toString(newTicket._ticketID);//tokenURI
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
         idToTicket[newTokenId] = newTicket;
@@ -202,7 +206,9 @@ contract Event is ERC721URIStorage {
             _owner: 0x0000000000000000000000000000000000000000,
             _ticketCost: 0,
             _onSale: false,
-            _isActive: false
+            _isActive: false,
+            _ownerImageLinks: new string[](0),
+            _organizerImageLinks: new string[](0)
             });
             return newTicket;
         }
@@ -262,6 +268,26 @@ contract Event is ERC721URIStorage {
         }
     }
 
+    function setTicketSaleOpp(uint256 ticketID) public {
+
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket sale state, wrong user");//restriced checks it
+
+        if(idToTicket[ticketID]._onSale == true)
+        {
+            idToTicket[ticketID]._onSale = false;
+        }
+        else 
+        {
+            idToTicket[ticketID]._onSale = true;
+        }
+
+        if (idToTicket[ticketID]._onSale) {
+            _ticketsSold.decrement();
+        } else {
+            _ticketsSold.increment();
+        }
+    }
+
     function getAllTickets() public view returns(Ticket[] memory) {
 
         uint256 totalNumTickets = _ticketIds.current();
@@ -282,8 +308,41 @@ contract Event is ERC721URIStorage {
     }
 
     function getAllTicketsByUserAddress(address userAddress) public view returns(Ticket[] memory) {
+        uint256 totalNumTickets = _ticketIds.current();
+        Ticket[] memory postTickets = new Ticket[](totalNumTickets);
+        uint256 currInd = 0;
+        
 
-        return  userToTicketStruct[userAddress]._tickets;
+        for (uint256 i=0; i< totalNumTickets; i++) {
+            if (idToTicket[i+1]._owner == userAddress && idToTicket[i+1]._isActive == true) {
+                //postTickets.push(idToTicket[i+1]);
+                postTickets[currInd] = idToTicket[i+1];
+                currInd = currInd + 1;
+            }
+            
+        }
+
+        return postTickets;
+
+        //return  userToTicketStruct[userAddress]._tickets;
+    }
+
+    function getTicketOwnerByID(uint tID) public view returns(address){
+        return idToTicket[tID]._owner;
+    }
+
+    function uploadOwnerImage(uint ticketID, string[] memory imageLinks) public {
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket image state, wrong user");//restriced checks it
+
+        for (uint256 i=0; i< imageLinks.length; i++) 
+            idToTicket[ticketID]._ownerImageLinks.push(imageLinks[i]);
+    }
+
+    function uploadOrganizerImage(uint ticketID, string[] memory imageLinks) public {
+        require(idToTicket[ticketID]._owner == msg.sender, "Error: Cannot change ticket image state, wrong user");//restriced checks it
+
+        for (uint256 i=0; i< imageLinks.length; i++) 
+            idToTicket[ticketID]._organizerImageLinks.push(imageLinks[i]);
     }
 
     /*
